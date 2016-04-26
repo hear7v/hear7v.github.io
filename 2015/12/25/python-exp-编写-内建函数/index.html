@@ -1,0 +1,618 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>python-exp-编写-内建函数 | Hear7v&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Hear7v">
+    
+
+    
+    <meta name="description" content="学python感觉就是熟悉python各方面的库，这里总结一下python的内建函数，这些函数的熟练掌握，对开发的效率有很大的帮助。 
+listabs()返回一个数的绝对值。参数可以是普通的整数，长整数或者浮点数。如果参数是个复数，返回它的模。
+open(name[, mode[, buffering]])如果文件不能打开，抛出IOError。当要打开一个文件，优先使用open()，而不是直接调用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python-exp-编写-内建函数">
+<meta property="og:url" content="http://yoursite.com/2015/12/25/python-exp-编写-内建函数/index.html">
+<meta property="og:site_name" content="Hear7v's Blog">
+<meta property="og:description" content="学python感觉就是熟悉python各方面的库，这里总结一下python的内建函数，这些函数的熟练掌握，对开发的效率有很大的帮助。 
+listabs()返回一个数的绝对值。参数可以是普通的整数，长整数或者浮点数。如果参数是个复数，返回它的模。
+open(name[, mode[, buffering]])如果文件不能打开，抛出IOError。当要打开一个文件，优先使用open()，而不是直接调用">
+<meta property="og:updated_time" content="2016-01-11T03:06:15.557Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="python-exp-编写-内建函数">
+<meta name="twitter:description" content="学python感觉就是熟悉python各方面的库，这里总结一下python的内建函数，这些函数的熟练掌握，对开发的效率有很大的帮助。 
+listabs()返回一个数的绝对值。参数可以是普通的整数，长整数或者浮点数。如果参数是个复数，返回它的模。
+open(name[, mode[, buffering]])如果文件不能打开，抛出IOError。当要打开一个文件，优先使用open()，而不是直接调用">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Hear7v&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Hear7v&#39;s Blog" title="Hear7v&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Hear7v&#39;s Blog">Hear7v&#39;s Blog</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/category">Category</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/12/25/python-exp-编写-内建函数/" title="python-exp-编写-内建函数" itemprop="url">python-exp-编写-内建函数</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Hear7v" target="_blank" itemprop="author">Hear7v</a>
+		
+  <p class="article-time">
+    <time datetime="2015-12-25T01:27:27.000Z" itemprop="datePublished"> 發表於 2015-12-25</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#list"><span class="toc-number">1.</span> <span class="toc-text">list</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#abs()"><span class="toc-number">1.1.</span> <span class="toc-text">abs()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#open(name[,_mode[,_buffering]])"><span class="toc-number">1.2.</span> <span class="toc-text">open(name[, mode[, buffering]])</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Arguments"><span class="toc-number">1.2.1.</span> <span class="toc-text">Arguments</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Return_Value"><span class="toc-number">1.2.2.</span> <span class="toc-text">Return Value</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#enumerate(sequence,_start=0)"><span class="toc-number">1.3.</span> <span class="toc-text">enumerate(sequence, start=0)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#all(iterable)"><span class="toc-number">1.4.</span> <span class="toc-text">all(iterable)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#any(iterable)"><span class="toc-number">1.5.</span> <span class="toc-text">any(iterable)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bin(x)"><span class="toc-number">1.6.</span> <span class="toc-text">bin(x)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#chr(i)"><span class="toc-number">1.7.</span> <span class="toc-text">chr(i)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#classmethod(function)"><span class="toc-number">1.8.</span> <span class="toc-text">classmethod(function)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cmp(x,_y)"><span class="toc-number">1.9.</span> <span class="toc-text">cmp(x, y)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hex(x)"><span class="toc-number">1.10.</span> <span class="toc-text">hex(x)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#len(s)"><span class="toc-number">1.11.</span> <span class="toc-text">len(s)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#list([iterable])"><span class="toc-number">1.12.</span> <span class="toc-text">list([iterable])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#map(function,_iterable,_…)"><span class="toc-number">1.13.</span> <span class="toc-text">map(function, iterable, …)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#max(iterable[,_key])"><span class="toc-number">1.14.</span> <span class="toc-text">max(iterable[, key])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#max(arg1,_arg2,_*args[,_key])"><span class="toc-number">1.15.</span> <span class="toc-text">max(arg1, arg2, *args[, key])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#min(iterable[,_key])"><span class="toc-number">1.16.</span> <span class="toc-text">min(iterable[, key])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#min(arg1,_arg2,_*args[,_key])"><span class="toc-number">1.17.</span> <span class="toc-text">min(arg1, arg2, *args[, key])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#next(iterator[,_default])"><span class="toc-number">1.18.</span> <span class="toc-text">next(iterator[, default])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pow(x,_y[,_z])"><span class="toc-number">1.19.</span> <span class="toc-text">pow(x, y[, z])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#print(*objects,_sep=’_‘,_end=’\n’,_file=sys-stdout)"><span class="toc-number">1.20.</span> <span class="toc-text">print(*objects, sep=’ ‘, end=’\n’, file=sys.stdout)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#range(stop)"><span class="toc-number">1.21.</span> <span class="toc-text">range(stop)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#range(start,_stop[,_step])"><span class="toc-number">1.22.</span> <span class="toc-text">range(start, stop[, step])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#round(number[,_ndigits])"><span class="toc-number">1.23.</span> <span class="toc-text">round(number[, ndigits])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sorted(iterable[,_cmp[,_key[,_reverse]]])"><span class="toc-number">1.24.</span> <span class="toc-text">sorted(iterable[, cmp[, key[, reverse]]])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#tuple([iterable])"><span class="toc-number">1.25.</span> <span class="toc-text">tuple([iterable])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#unichr(i)"><span class="toc-number">1.26.</span> <span class="toc-text">unichr(i)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#xrange(stop)"><span class="toc-number">1.27.</span> <span class="toc-text">xrange(stop)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#xrange(start,_stop[,_step])"><span class="toc-number">1.28.</span> <span class="toc-text">xrange(start, stop[, step])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zip([iterable,_…])"><span class="toc-number">1.29.</span> <span class="toc-text">zip([iterable, …])</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<p>学python感觉就是熟悉python各方面的库，这里总结一下python的内建函数，这些函数的熟练掌握，对开发的效率有很大的帮助。 </p>
+<h2 id="list">list</h2><h3 id="abs()">abs()</h3><p>返回一个数的绝对值。参数可以是普通的整数，长整数或者浮点数。如果参数是个复数，返回它的模。</p>
+<h3 id="open(name[,_mode[,_buffering]])">open(name[, mode[, buffering]])</h3><p>如果文件不能打开，抛出<code>IOError</code>。当要打开一个文件，优先使用<code>open()</code>，而不是直接调用file构造函数。</p>
+<h4 id="Arguments">Arguments</h4><p><code>name</code>:要打开文件的名字<br><code>mode</code>:打开文件的模式<br>    <code>r</code>读,<code>w</code>写,<code>a</code>附加,<code>b</code>二进制模式<br>    模式’r+’，’w+’和’a+’打开文件以便更新（同时读写）。注意’w+’会截断文件。在区分文本文件和二进制文件的系统上，在模式中附加’b’会以二进制模式打开文件；在不区分的系统上，添加’b’没有效果。<br><code>buffering</code>:指明了文件需要的缓冲大小<br>    0意味着无缓冲；1意味着缓冲；其他正值表示使用参数大小的缓冲(大概值，以字节为单位)。负的<code>buffering</code>意味着使用系统的默认值，一般来说，对于tty设备，它是行缓冲；对于其它文件，它是全缓冲。如果没有改参数，使用系统的默认值。</p>
+<h4 id="Return_Value">Return Value</h4><p>打开一个文件，返回一个<code>file</code>类型的对象，file类型描述于<code>File Objects</code>章节(文尾介绍)。</p>
+<h3 id="enumerate(sequence,_start=0)">enumerate(sequence, start=0)</h3><p>返回一个枚举对象。sequence必须是个序列，迭代器iterator，或者支持迭代的对象。enumerate()返回的迭代器的next()方法返回一个元组，它包含一个计数（从start开始，默认为0）和从sequence中迭代得到的值：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="prompt">&gt;&gt;&gt; </span>seasons = [<span class="string">'Spring'</span>, <span class="string">'Summer'</span>, <span class="string">'Fall'</span>, <span class="string">'Winter'</span>]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>list(enumerate(seasons))</span><br><span class="line">[(<span class="number">0</span>, <span class="string">'Spring'</span>), (<span class="number">1</span>, <span class="string">'Summer'</span>), (<span class="number">2</span>, <span class="string">'Fall'</span>), (<span class="number">3</span>, <span class="string">'Winter'</span>)]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>list(enumerate(seasons, start=<span class="number">1</span>))</span><br><span class="line">[(<span class="number">1</span>, <span class="string">'Spring'</span>), (<span class="number">2</span>, <span class="string">'Summer'</span>), (<span class="number">3</span>, <span class="string">'Fall'</span>), (<span class="number">4</span>, <span class="string">'Winter'</span>)]</span><br></pre></td></tr></table></figure></p>
+<h3 id="all(iterable)">all(iterable)</h3><p>如果iterable的所有元素为真（或者iterable为空）， 返回True。</p>
+<h3 id="any(iterable)">any(iterable)</h3><p>如果iterable的任一元素为真，返回True。如果iterable为空，返回False。</p>
+<h3 id="bin(x)">bin(x)</h3><p>将一个整数转化成一个二进制字符串。结果是一个合法的Python表达式。如果x不是一个Python int对象，它必须定义一个返回整数的<strong>index</strong>()方法。</p>
+<h3 id="chr(i)">chr(i)</h3><p>返回一个单字符字符串，字符的ASCII码为整数i。例如，chr(97)返回字符串’a’。 它是ord()的逆运算。参数的取值范围为[0..255]的闭区间；如果i超出取值范围，抛出ValueError。参见unichr()。</p>
+<h3 id="classmethod(function)">classmethod(function)</h3><p>将function包装成类方法。<br>类方法接受类作为隐式的第一个参数，就像实例方法接受实例作为隐式的第一个参数一样。</p>
+<h3 id="cmp(x,_y)">cmp(x, y)</h3><p>比较两个对象x和y，根据结果返回一个整数。如果x &lt; y，返回负数；如果x == y，返回0；如果x &gt; y，返回正数。</p>
+<h3 id="hex(x)">hex(x)</h3><p>将任意大小的整数转化成以“0x”打头的小写的十六进制字符串</p>
+<h3 id="len(s)">len(s)</h3><p>返回对象的长度（元素的个数）。参数可以是序列（如字符串，字节，元组，列表或者范围）或者集合（如字典，集合或者固定集合）。</p>
+<h3 id="list([iterable])">list([iterable])</h3><p>返回一个列表，其元素来自于iterable（保持相同的值和顺序）。iterable可以是个序列，支持迭代的容器，或者迭代器对象。如果iterable已经是个列表，返回其拷贝，类似于iterable[:]。例如，list(‘abc’)返回[‘a’, ‘b’, ‘c’]，list( (1, 2, 3) )返回[1, 2, 3]。如果没有参数，返回一个新的空的列表，[]。</p>
+<h3 id="map(function,_iterable,_…)">map(function, iterable, …)</h3><p>将function应用于iterable的每一个元素，返回结果的列表。如果有额外的iterable参数，并行的从这些参数中取元素，并调用function。如果一个参数比另外的要短，将以None扩展该参数元素。如果function是None使用特性函数；如果有多个参数，map()返回一元组列表，元组包含从各个参数中取得的对应的元素（某种变换操作）。iterable参数可以是序列或者任意可迭代对象；结果总是列表。</p>
+<h3 id="max(iterable[,_key])">max(iterable[, key])</h3><h3 id="max(arg1,_arg2,_*args[,_key])">max(arg1, arg2, *args[, key])</h3><p>返回可迭代的对象中的最大的元素，或者返回2个或多个参数中的最大的参数。<br>如果有一个位置参数，iterable必须是个非空的可迭代对象（如非空字符串，元组或者列表）。返回可迭代对象中最大的元素。如果有2个或更多的位置参数，返回最大位置参数。<br>可选的key参数指明了有一个参数的排序函数，如list.sort()中使用的排序函数。如果有key参数，它必须是关键字参数（例如，max(a,b,c,key=func)）。</p>
+<h3 id="min(iterable[,_key])">min(iterable[, key])</h3><h3 id="min(arg1,_arg2,_*args[,_key])">min(arg1, arg2, *args[, key])</h3><h3 id="next(iterator[,_default])">next(iterator[, default])</h3><p>通过调用iterator的next()方法，得到它的下一个元素。如果有default参数，在迭代器迭代完所有元素之后返回该参数；否则抛出StopIteration。</p>
+<h3 id="pow(x,_y[,_z])">pow(x, y[, z])</h3><p>返回x 的 y次幂; 如果 z 提供的时候，, 返回 x 的 y 次幂，然后对  z 取模。(这样比 pow(x, y) % z) 更高效。两个参数的形式 pow(x, y) 与使用 操作符: x**y 是等价的。</p>
+<h3 id="print(*objects,_sep=’_‘,_end=’\n’,_file=sys-stdout)">print(*objects, sep=’ ‘, end=’\n’, file=sys.stdout)</h3><p>以sep分割，end的值结尾，将对象打印到文件流中。sep, end 和 file，如果提供这三个参数的话，必须以键值的形式。</p>
+<p>所有非键值形式提供的参数，都被转化为字符串，就像用str()转化那样。然后写到 文件流中，以 sep 分割， end 结尾。sep and end 都必须是字符串形式的; 也可以留成 None, 这样会使用默认值。如果没有打印 对象, print() 只打印一个 结束符号 end.</p>
+<h3 id="range(stop)">range(stop)</h3><h3 id="range(start,_stop[,_step])">range(start, stop[, step])</h3><p>这是一个创建包含数列的列表的通用函数。它最常用于for循环。参数必须为普通的整数。如果step参数省略，则默认为1。如果start参数省略，则默认为0。该函数的完整形式返回一个整数列表[start, start + step, start + 2 <em> step, …]。如果step为正，则最后一个元素start + i </em> step最大且小于stop；如果step为负，则最后一个元素start + i * step最小且大于stop。step必须不能为零（否则会引发ValueError）。示例：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="prompt">&gt;&gt;&gt; </span>range(<span class="number">10</span>)</span><br><span class="line">[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>range(<span class="number">1</span>, <span class="number">11</span>)</span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>range(<span class="number">0</span>, <span class="number">30</span>, <span class="number">5</span>)</span><br><span class="line">[<span class="number">0</span>, <span class="number">5</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">20</span>, <span class="number">25</span>]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>range(<span class="number">0</span>, <span class="number">10</span>, <span class="number">3</span>)</span><br><span class="line">[<span class="number">0</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">9</span>]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>range(<span class="number">0</span>, -<span class="number">10</span>, -<span class="number">1</span>)</span><br><span class="line">[<span class="number">0</span>, -<span class="number">1</span>, -<span class="number">2</span>, -<span class="number">3</span>, -<span class="number">4</span>, -<span class="number">5</span>, -<span class="number">6</span>, -<span class="number">7</span>, -<span class="number">8</span>, -<span class="number">9</span>]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>range(<span class="number">0</span>)</span><br><span class="line">[]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>range(<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">[]</span><br></pre></td></tr></table></figure></p>
+<h3 id="round(number[,_ndigits])">round(number[, ndigits])</h3><p>返回一个浮点型 近似值，保留小数点后 ndigits 位。如果省略ndigits，它默认为零。结果是一个浮点数。该值将被圆整为距离10的负ndigits次方的最近的某个倍数; 如果有两个倍数离的一样近,结果取离0较远的（所以，例如，round(0.5)是1.0 且round(-0.5)是-1.0）。</p>
+<h3 id="sorted(iterable[,_cmp[,_key[,_reverse]]])">sorted(iterable[, cmp[, key[, reverse]]])</h3><p>依据iterable中的元素返回一个新的列表。</p>
+<p>可选参数cmp、key和reverse与list.sort()方法的参数含义相同（在可变的序列类型一节描述）。</p>
+<p><code>cmp</code>指定一个自定义的带有两个参数的比较函数（可迭代的元素），它应该根据第一个参数是小于、等于还是大于第二个参数返回负数、零或者正数：cmp=lambda x,y: cmp(x.lower(), y.lower())。默认值是None。</p>
+<p><code>key</code>指定一个带有一个参数的函数，它用于从每个列表元素选择一个比较的关键字：key=str.lower。默认值是None（直接比较元素）。</p>
+<p><code>reverse</code>是一个布尔值。如果设置为True，那么列表元素以反向比较排序。</p>
+<h3 id="tuple([iterable])">tuple([iterable])</h3><p>返回一个元组，其元素及顺序与iterable的元素相同。iterable可以是一个序列、支持迭代操作的容器或迭代器对象。如果iterable已经是一个元组，它将被原样返回。例如，tuple(‘abc’)返回(‘a’, ‘b’, ‘c’)，tuple([1, 2, 3])返回(1, 2, 3)。如果没有给出参数，则返回一个空的元组()。</p>
+<h3 id="unichr(i)">unichr(i)</h3><p>返回Unicode码为整数i的Unicode字符。例如，unichr(97)返回字符串u’a’。这是Unicode字符串ord()的反转。其参数合法的范围取决于Python是如何配置的 – 它可以是UCS2 [0..0xFFFF] 或者UCS4 [0..0x10FFFF]。否则引发ValueError。对于ASCII和8比特字符串，请参阅chr()。</p>
+<h3 id="xrange(stop)">xrange(stop)</h3><h3 id="xrange(start,_stop[,_step])">xrange(start, stop[, step])</h3><p>该函数与<code>range()</code>非常相似，但是它返回一个xrange 对象而不是一个列表。这是一个惰性的序列类型，它生成与对应的列表相同的值但不会真正同时一起存储它们。xrange()相比range()的优点不大（因为xrange()仍然必须创建需要的值），除非在内存紧张的机器上使用一个非常大的range或者range的所有元素从不会使用（例如当循环经常被break终止）。关于xrange对象的更多对象，请参阅XRange 类型和序列类型— str, unicode, list, tuple, bytearray, buffer, xrange。</p>
+<h3 id="zip([iterable,_…])">zip([iterable, …])</h3><p>该函数返回一个元组的列表，其中第 i 个元组包含每个参数序列的第 i 个元素。返回的列表长度被截断为最短的参数序列的长度。当多个参数都具有相同的长度时，zip()类似于带有一个初始参数为None的map()。只有一个序列参数时，它返回一个1元组的列表。没有参数时，它返回一个空的列表。</p>
+<p>可以保证迭代按从左向右的计算顺序。这使得使用zip(<em>[iter(s)]</em>n)来将一系列数据分类归并为长度为n的组成为习惯用法。</p>
+<p>zip() 与 * 操作符一起可以用来 unzip 一个列表：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="prompt">&gt;&gt;&gt; </span>x = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>y = [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>zipped = zip(x, y)</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>zipped</span><br><span class="line">[(<span class="number">1</span>, <span class="number">4</span>), (<span class="number">2</span>, <span class="number">5</span>), (<span class="number">3</span>, <span class="number">6</span>)]</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>x2, y2 = zip(*zipped)</span><br><span class="line"><span class="prompt">&gt;&gt;&gt; </span>x == list(x2) <span class="keyword">and</span> y == list(y2)</span><br><span class="line"><span class="keyword">True</span></span><br></pre></td></tr></table></figure></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/python/">python</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/exp/">exp</a><a href="/tags/python/">python</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2015/12/25/python-exp-编写-内建函数/" data-title="python-exp-编写-内建函数 | Hear7v&#39;s Blog" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2015/12/29/python-常用基础知识笔记/" title="python 常用基础知识笔记">
+  <strong>上一篇：</strong><br/>
+  <span>
+  python 常用基础知识笔记</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2015/12/24/python-exp-编写-基础知识总结/"  title="python exp 编写 基础知识总结">
+ <strong>下一篇：</strong><br/> 
+ <span>python exp 编写 基础知识总结
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#list"><span class="toc-number">1.</span> <span class="toc-text">list</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#abs()"><span class="toc-number">1.1.</span> <span class="toc-text">abs()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#open(name[,_mode[,_buffering]])"><span class="toc-number">1.2.</span> <span class="toc-text">open(name[, mode[, buffering]])</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Arguments"><span class="toc-number">1.2.1.</span> <span class="toc-text">Arguments</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Return_Value"><span class="toc-number">1.2.2.</span> <span class="toc-text">Return Value</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#enumerate(sequence,_start=0)"><span class="toc-number">1.3.</span> <span class="toc-text">enumerate(sequence, start=0)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#all(iterable)"><span class="toc-number">1.4.</span> <span class="toc-text">all(iterable)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#any(iterable)"><span class="toc-number">1.5.</span> <span class="toc-text">any(iterable)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bin(x)"><span class="toc-number">1.6.</span> <span class="toc-text">bin(x)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#chr(i)"><span class="toc-number">1.7.</span> <span class="toc-text">chr(i)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#classmethod(function)"><span class="toc-number">1.8.</span> <span class="toc-text">classmethod(function)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cmp(x,_y)"><span class="toc-number">1.9.</span> <span class="toc-text">cmp(x, y)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hex(x)"><span class="toc-number">1.10.</span> <span class="toc-text">hex(x)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#len(s)"><span class="toc-number">1.11.</span> <span class="toc-text">len(s)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#list([iterable])"><span class="toc-number">1.12.</span> <span class="toc-text">list([iterable])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#map(function,_iterable,_…)"><span class="toc-number">1.13.</span> <span class="toc-text">map(function, iterable, …)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#max(iterable[,_key])"><span class="toc-number">1.14.</span> <span class="toc-text">max(iterable[, key])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#max(arg1,_arg2,_*args[,_key])"><span class="toc-number">1.15.</span> <span class="toc-text">max(arg1, arg2, *args[, key])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#min(iterable[,_key])"><span class="toc-number">1.16.</span> <span class="toc-text">min(iterable[, key])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#min(arg1,_arg2,_*args[,_key])"><span class="toc-number">1.17.</span> <span class="toc-text">min(arg1, arg2, *args[, key])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#next(iterator[,_default])"><span class="toc-number">1.18.</span> <span class="toc-text">next(iterator[, default])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pow(x,_y[,_z])"><span class="toc-number">1.19.</span> <span class="toc-text">pow(x, y[, z])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#print(*objects,_sep=’_‘,_end=’\n’,_file=sys-stdout)"><span class="toc-number">1.20.</span> <span class="toc-text">print(*objects, sep=’ ‘, end=’\n’, file=sys.stdout)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#range(stop)"><span class="toc-number">1.21.</span> <span class="toc-text">range(stop)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#range(start,_stop[,_step])"><span class="toc-number">1.22.</span> <span class="toc-text">range(start, stop[, step])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#round(number[,_ndigits])"><span class="toc-number">1.23.</span> <span class="toc-text">round(number[, ndigits])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sorted(iterable[,_cmp[,_key[,_reverse]]])"><span class="toc-number">1.24.</span> <span class="toc-text">sorted(iterable[, cmp[, key[, reverse]]])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#tuple([iterable])"><span class="toc-number">1.25.</span> <span class="toc-text">tuple([iterable])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#unichr(i)"><span class="toc-number">1.26.</span> <span class="toc-text">unichr(i)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#xrange(stop)"><span class="toc-number">1.27.</span> <span class="toc-text">xrange(stop)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#xrange(start,_stop[,_step])"><span class="toc-number">1.28.</span> <span class="toc-text">xrange(start, stop[, step])</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zip([iterable,_…])"><span class="toc-number">1.29.</span> <span class="toc-text">zip([iterable, …])</span></a></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/crypto/" title="crypto">crypto<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/linux/" title="linux">linux<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/misc/" title="misc">misc<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/pentest/" title="pentest">pentest<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/python/" title="python">python<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/web/" title="web">web<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/被动sql注入检测框架折腾/" title="被动sql注入检测框架折腾">被动sql注入检测框架折腾<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/python/" title="python">python<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/sqli/" title="sqli">sqli<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/exp/" title="exp">exp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/代码审计/" title="代码审计">代码审计<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/phpcms/" title="phpcms">phpcms<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/漏洞挖掘/" title="漏洞挖掘">漏洞挖掘<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/linux/" title="linux">linux<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ssrf/" title="ssrf">ssrf<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内网/" title="内网">内网<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/渗透/" title="渗透">渗透<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/object/" title="object">object<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/disable-functions/" title="disable_functions">disable_functions<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/文件包含/" title="文件包含">文件包含<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/header/" title="header">header<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/insert/" title="insert">insert<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/project/" title="project">project<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bypass/" title="bypass">bypass<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/moudle/" title="moudle">moudle<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情鏈接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.lynahex.com/" target="_blank" title="lynahex&#39;s Blog">lynahex&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">新浪微博</p>
+    <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> honesty and integrity surprisingly. <br/>
+			null</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Hear7v">Hear7v</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fe6d1f421bbc9962127a50488f9ed37d1' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

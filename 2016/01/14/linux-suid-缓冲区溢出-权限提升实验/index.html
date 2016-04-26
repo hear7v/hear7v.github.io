@@ -1,0 +1,642 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>linux suid 缓冲区溢出 权限提升实验 | Hear7v&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Hear7v">
+    
+
+    
+    <meta name="description" content="背景这里我们结合我们之前所学习的缓冲区溢出技术，以及linux suid机制，进行一次由普通用户权限提升为root用户权限的实验。
+知识回顾suid&amp;amp;sgidlinux权限SUID是Set User ID,SGID是Set Group ID的意思。在linux下，文件权限的表示格式    -rwxr-xr-x,这样的表示法一共有十位：
+9 8 7 6 5 4 3 2 1 0
+- r w x">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux suid 缓冲区溢出 权限提升实验">
+<meta property="og:url" content="http://yoursite.com/2016/01/14/linux-suid-缓冲区溢出-权限提升实验/index.html">
+<meta property="og:site_name" content="Hear7v's Blog">
+<meta property="og:description" content="背景这里我们结合我们之前所学习的缓冲区溢出技术，以及linux suid机制，进行一次由普通用户权限提升为root用户权限的实验。
+知识回顾suid&amp;amp;sgidlinux权限SUID是Set User ID,SGID是Set Group ID的意思。在linux下，文件权限的表示格式    -rwxr-xr-x,这样的表示法一共有十位：
+9 8 7 6 5 4 3 2 1 0
+- r w x">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/1.png">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/2.png">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/3.png">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/4.png">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/5.png">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/6.png">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/7.png">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/8.png">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/9.png">
+<meta property="og:image" content="http://yoursite.com/images/linux提权实验/10.png">
+<meta property="og:updated_time" content="2016-01-14T05:05:10.758Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="linux suid 缓冲区溢出 权限提升实验">
+<meta name="twitter:description" content="背景这里我们结合我们之前所学习的缓冲区溢出技术，以及linux suid机制，进行一次由普通用户权限提升为root用户权限的实验。
+知识回顾suid&amp;amp;sgidlinux权限SUID是Set User ID,SGID是Set Group ID的意思。在linux下，文件权限的表示格式    -rwxr-xr-x,这样的表示法一共有十位：
+9 8 7 6 5 4 3 2 1 0
+- r w x">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Hear7v&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Hear7v&#39;s Blog" title="Hear7v&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Hear7v&#39;s Blog">Hear7v&#39;s Blog</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/category">Category</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/01/14/linux-suid-缓冲区溢出-权限提升实验/" title="linux suid 缓冲区溢出 权限提升实验" itemprop="url">linux suid 缓冲区溢出 权限提升实验</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Hear7v" target="_blank" itemprop="author">Hear7v</a>
+		
+  <p class="article-time">
+    <time datetime="2016-01-13T16:02:30.000Z" itemprop="datePublished"> 發表於 2016-01-14</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#知识回顾"><span class="toc-number">2.</span> <span class="toc-text">知识回顾</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#suid&sgid"><span class="toc-number">2.1.</span> <span class="toc-text">suid&sgid</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#linux权限"><span class="toc-number">2.1.1.</span> <span class="toc-text">linux权限</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#suid_sgid机制"><span class="toc-number">2.1.2.</span> <span class="toc-text">suid sgid机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#euid_egid"><span class="toc-number">2.1.3.</span> <span class="toc-text">euid egid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#suid_sgid_总结"><span class="toc-number">2.1.4.</span> <span class="toc-text">suid sgid 总结</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ruid"><span class="toc-number">2.1.5.</span> <span class="toc-text">ruid</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓冲区溢出"><span class="toc-number">2.2.</span> <span class="toc-text">缓冲区溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#栈溢出-栈的作用"><span class="toc-number">2.2.1.</span> <span class="toc-text">栈溢出-栈的作用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#栈溢出-原理"><span class="toc-number">2.2.2.</span> <span class="toc-text">栈溢出-原理</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实验"><span class="toc-number">3.</span> <span class="toc-text">实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#环境准备"><span class="toc-number">3.1.</span> <span class="toc-text">环境准备</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#程序编译"><span class="toc-number">3.1.1.</span> <span class="toc-text">程序编译</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#linux_aslr"><span class="toc-number">3.1.2.</span> <span class="toc-text">linux aslr</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#start"><span class="toc-number">3.1.3.</span> <span class="toc-text">start</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<h2 id="背景">背景</h2><p>这里我们结合我们之前所学习的缓冲区溢出技术，以及linux suid机制，进行一次由普通用户权限提升为root用户权限的实验。</p>
+<h2 id="知识回顾">知识回顾</h2><h3 id="suid&amp;sgid">suid&amp;sgid</h3><h4 id="linux权限">linux权限</h4><p><code>SUID</code>是Set User ID,<code>SGID</code>是Set Group ID的意思。<br>在linux下，文件权限的表示格式    <code>-rwxr-xr-x</code>,这样的表示法一共有十位：</p>
+<pre><code><span class="number">9</span> <span class="number">8</span> <span class="number">7</span> <span class="number">6</span> <span class="number">5</span> <span class="number">4</span> <span class="number">3</span> <span class="number">2</span> <span class="number">1</span> <span class="number">0</span>
+- r w x r - x r - x
+</code></pre><p>后九位依次表示文件所有者，同组用户，其他用户的权限<br>如果一个文件被设置了<code>SUID</code>或<code>SGID</code>位，会分别表现在所有者或同组用户的可执行位上。例如：<code>-rwsr-xr-x</code>,<code>-rwxr-sr-x</code></p>
+<pre><code><span class="number">11</span> <span class="number">10</span> <span class="number">9</span> <span class="number">8</span> <span class="number">7</span> <span class="number">6</span> <span class="number">5</span> <span class="number">4</span> <span class="number">3</span> <span class="number">2</span> <span class="number">1</span> <span class="number">0</span>
+S  G  T r w x r w x r w x
+</code></pre><p>给文件加SUID和SUID的命令如下：</p>
+<ul>
+<li>chmod u+s filename 设置SUID位</li>
+<li>chmod u-s filename 去掉SUID设置</li>
+<li>chmod g+s filename 设置SGID位</li>
+<li>chmod g-s filename 去掉SGID设置</li>
+</ul>
+<h4 id="suid_sgid机制">suid sgid机制</h4><p><code>SUID</code>和<code>SGID</code>是在执行程序（程序的可执行位被设置）时起作用，而可执行位只对普通文件和目录文件有意义，所以设置其他种类文件的<code>SUID</code>和<code>SGID</code>位是没有多大意义的。</p>
+<p>UNIX的内核是根据什么来确定一个进程对资源的访问权限的呢？是这个进程的运行用户的（有效）ID，包括<code>user id</code>和<code>group id</code>。用户可以用<code>id</code>命令来查到自己的或其他用户的<code>user id</code>和<code>group id</code>。</p>
+<h4 id="euid_egid">euid egid</h4><p>除了一般的<code>user id</code> 和<code>group id</code>外，还有两个称之为effective 的id，就是有效id，上面的四个id表示为：<code>uid</code>，<code>gid</code>，<code>euid</code>，<code>egid</code>。内核主要是根据<code>euid</code>和<code>egid</code>来确定进程对资源的访问权限。</p>
+<p>一个进程如果没有<code>SUID</code>或<code>SGID</code>位，则<code>euid=uid egid=gid</code>，分别是运行这个程序的用户的<code>uid</code>和<code>gid</code>。如果一个程序设置了<code>SUID</code>，则<code>euid</code>和<code>egid</code>变成被运行的程序的所有者的<code>uid</code>和<code>gid</code></p>
+<h4 id="suid_sgid_总结">suid sgid 总结</h4><p><code>SUID</code>的作用就是这样：让本来没有相应权限的用户运行这个程序时，可以访问他没有权限访问的资源。</p>
+<p><code>SUID</code>的优先级比<code>SGID</code>高，当一个可执行程序设置了<code>SUID</code>，则<code>SGID</code>会自动变成相应的<code>egid</code>。</p>
+<h4 id="ruid">ruid</h4><p>该ID用户标识用户进程执行操作的权限。例如:如果EUID是0即(root),此时进程拥有root用户权限。普通用户可以将EUID设置为RUID或者SUID，而超级用户可以将EUID设置为任意的合法UID。</p>
+<p>注意：对于一个可执行的二进制文件，如果其set-user-id bit被设置，则运行改程序时，对应进程的有效用户ID(EUID)为该文件的文件所有者用户ID。</p>
+<h3 id="缓冲区溢出">缓冲区溢出</h3><p>顾名思义，缓冲区溢出的含义是为缓冲区提供了多于其存储容量的数据，就像往杯子里倒入了过量的水一样。通常情况下，缓冲区溢出的数据只会破坏程序数据，造成 意外终止。但是如果有人精心构造溢出数据的内容，那么就有可能获得系统的控制权！如果说用户（也可能是黑客）提供了水——缓冲区溢出攻击的数据，那么系统 提供了溢出的容器——缓冲区。</p>
+<h4 id="栈溢出-栈的作用">栈溢出-栈的作用</h4><p>栈的主要功能是实现函数的调用。因此在介绍栈溢出原理之前，需要弄清函数调用时栈空间发生了怎样的变化。每次函数调用时，系统会把函数的返回地址（函数调用 指令后紧跟指令的地址），一些关键的寄存器值保存在栈内，函数的实际参数和局部变量（包括数据、结构体、对象等）也会保存在栈内。这些数据统称为函数调用 的栈帧，而且是每次函数调用都会有个独立的栈帧，这也为递归函数的实现提供了可能。</p>
+<p><img src="/images/linux提权实验/1.png" alt=""></p>
+<p>如图所示，我们定义了一个简单的函数function，它接受一个整形参数，做一次乘法操作并返回。当调用function(0)时，arg参数记录了值0入栈，并将call function指令下一条指令的地址0x00bd16f0保存到栈内，然后跳转到function函数内部执行。每个函数定义都会有函数头和函数尾代码，如图绿框表示。因为函数内需要用ebp保存函数栈帧基址，因此先保存ebp原来的值到栈内，然后将栈指针esp内容保存到ebp。函数返回前需要做相反的操作——将esp指针恢复，并弹出ebp。这样，函数内正常情况下无论怎样使用栈，都不会使栈失去平衡。</p>
+<h4 id="栈溢出-原理">栈溢出-原理</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">fun</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> *data)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> buffer[BUF_LEN];</span><br><span class="line">    <span class="built_in">strcpy</span>((<span class="keyword">char</span>*)buffer,(<span class="keyword">char</span>*)data);<span class="comment">//溢出点</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>它是一个典型的栈溢出代码。在使用不安全的strcpy库函数时，系统会盲目地将data的全部数据拷贝到buffer指向的内存区域。buffer的长度是有限的，一旦data的数据长度超过BUF_LEN，便会产生缓冲区溢出。如图所示</p>
+<p><img src="/images/linux提权实验/2.png" alt=""></p>
+<h2 id="实验">实验</h2><p>漏洞程序源码<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">test</span><span class="params">(<span class="keyword">char</span>* msg)</span></span>&#123;</span><br><span class="line">	<span class="keyword">char</span> buf[<span class="number">128</span>];</span><br><span class="line">	<span class="built_in">strcpy</span>(buf,msg);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (argc&lt;<span class="number">2</span>)&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	test(argv[<span class="number">1</span>]);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="环境准备">环境准备</h3><h4 id="程序编译">程序编译</h4><p><code>gcc -g -fno-stack-protector -z execstack -o level level.c</code><br><code>-fno-stack-protector</code>和<code>-z execstack</code>这两个参数会分别关掉<code>DEP</code>和<code>Stack Protector</code>。</p>
+<h4 id="linux_aslr">linux aslr</h4><figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo -s</span><br><span class="line">echo <span class="number">0</span> &gt; /<span class="keyword">proc</span>/sys/kernel/randomize_va_space</span><br></pre></td></tr></table></figure>
+<p>执行完后我们就关掉整个linux系统的ASLR保护。</p>
+<p><img src="/images/linux提权实验/3.png" alt=""></p>
+<h4 id="start">start</h4><p>gdb的调试环境会影响buf在内存中的位置，虽然我们关闭了ASLR，但这只能保证buf的地址在gdb的调试环境中不变，但当我们直接执行./level1的时候，buf的位置会固定在别的地址上。解决方法就是开启core dump这个功能。<br><figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ulimit -c unlimited</span><br><span class="line">sudo sh -c 'echo <span class="string">"/tmp/core.%t"</span> &gt; /<span class="keyword">proc</span>/sys/kernel/core_pattern'</span><br></pre></td></tr></table></figure></p>
+<p>开启之后，当出现内存错误的时候，系统会生成一个core dump文件在tmp目录下。然后我们再用gdb查看这个core文件就可以获取到buf真正的地址了。<br>但是setuid的程序不能被core dump下来。<br><img src="/images/linux提权实验/4.png" alt=""></p>
+<p>由于setuid程序没有办法core dump下来进行分析，所以我们在分析完漏洞程序写出exp后再将此程序设置为setuid。<br>用pattern.py生成字符串去执行致使level报错  –&gt; core dump，gdb分析  –&gt; 写出exp –&gt; 把level程序设置为setuid –&gt; 再用exp打，成功提权。</p>
+<p>首先我们先来确定溢出点的位置，使用pattern.py这个脚本来进行计算。<br><img src="/images/linux提权实验/5.png" alt=""></p>
+<p>会dump出出错文件，查看断点。<br><code>gdb level1 /tmp/core.1433844471</code><br><img src="/images/linux提权实验/6.png" alt=""></p>
+<p>计算偏移<br><img src="/images/linux提权实验/7.png" alt=""><br>就可以非常容易的计算出PC返回值的覆盖点为140个字节。我们只要构造一个”A”*140+ret字符串，就可以让pc执行ret地址上的代码了</p>
+<p>下面我们队覆盖进行验证<br><img src="/images/linux提权实验/8.png" alt=""><br>观察返回地址，验证成功</p>
+<p>现在我们的问题是将shellcode放在何处。在这里我们将shellcode放在开始位置，ret需指向shellcode起始的地方，所以现在的结构是shellcode + ‘A’ * (140 - len(shellcode)) + ret。<br>0xbffff618<br>现在唯一缺少的就是返回地址了，我们可以通过ret= $esp-144 来得到，即为0xbffff040</p>
+<p>执行    <code>payload</code><br><img src="/images/linux提权实验/9.png" alt=""></p>
+<p>最后我们将程序赋予setuid的权限<br><code>sudo chown root:root level</code><br><code>sudo chmod +s level</code><br><code>ls -l</code><br>现在我们通过缓冲区溢出执行shellcode拿到shell后会具备root权限。<br>如下图：</p>
+<p><img src="/images/linux提权实验/10.png" alt=""></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/linux/">linux</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/linux/">linux</a><a href="/tags/suid/">suid</a><a href="/tags/提权/">提权</a><a href="/tags/缓冲区溢出/">缓冲区溢出</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2016/01/14/linux-suid-缓冲区溢出-权限提升实验/" data-title="linux suid 缓冲区溢出 权限提升实验 | Hear7v&#39;s Blog" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/01/17/python-多线程入门/" title="python 多线程入门">
+  <strong>上一篇：</strong><br/>
+  <span>
+  python 多线程入门</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/01/13/二探baidu内网-ssrf-rpc/"  title="二探baidu内网 ssrf rpc">
+ <strong>下一篇：</strong><br/> 
+ <span>二探baidu内网 ssrf rpc
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#知识回顾"><span class="toc-number">2.</span> <span class="toc-text">知识回顾</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#suid&sgid"><span class="toc-number">2.1.</span> <span class="toc-text">suid&sgid</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#linux权限"><span class="toc-number">2.1.1.</span> <span class="toc-text">linux权限</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#suid_sgid机制"><span class="toc-number">2.1.2.</span> <span class="toc-text">suid sgid机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#euid_egid"><span class="toc-number">2.1.3.</span> <span class="toc-text">euid egid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#suid_sgid_总结"><span class="toc-number">2.1.4.</span> <span class="toc-text">suid sgid 总结</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ruid"><span class="toc-number">2.1.5.</span> <span class="toc-text">ruid</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓冲区溢出"><span class="toc-number">2.2.</span> <span class="toc-text">缓冲区溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#栈溢出-栈的作用"><span class="toc-number">2.2.1.</span> <span class="toc-text">栈溢出-栈的作用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#栈溢出-原理"><span class="toc-number">2.2.2.</span> <span class="toc-text">栈溢出-原理</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实验"><span class="toc-number">3.</span> <span class="toc-text">实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#环境准备"><span class="toc-number">3.1.</span> <span class="toc-text">环境准备</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#程序编译"><span class="toc-number">3.1.1.</span> <span class="toc-text">程序编译</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#linux_aslr"><span class="toc-number">3.1.2.</span> <span class="toc-text">linux aslr</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#start"><span class="toc-number">3.1.3.</span> <span class="toc-text">start</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/crypto/" title="crypto">crypto<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/linux/" title="linux">linux<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/misc/" title="misc">misc<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/pentest/" title="pentest">pentest<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/python/" title="python">python<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/web/" title="web">web<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/被动sql注入检测框架折腾/" title="被动sql注入检测框架折腾">被动sql注入检测框架折腾<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/python/" title="python">python<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/sqli/" title="sqli">sqli<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/exp/" title="exp">exp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/代码审计/" title="代码审计">代码审计<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/phpcms/" title="phpcms">phpcms<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/漏洞挖掘/" title="漏洞挖掘">漏洞挖掘<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/linux/" title="linux">linux<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ssrf/" title="ssrf">ssrf<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内网/" title="内网">内网<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/渗透/" title="渗透">渗透<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/object/" title="object">object<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/disable-functions/" title="disable_functions">disable_functions<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/文件包含/" title="文件包含">文件包含<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/header/" title="header">header<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/insert/" title="insert">insert<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/project/" title="project">project<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bypass/" title="bypass">bypass<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/moudle/" title="moudle">moudle<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情鏈接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.lynahex.com/" target="_blank" title="lynahex&#39;s Blog">lynahex&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">新浪微博</p>
+    <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> honesty and integrity surprisingly. <br/>
+			null</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Hear7v">Hear7v</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fe6d1f421bbc9962127a50488f9ed37d1' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

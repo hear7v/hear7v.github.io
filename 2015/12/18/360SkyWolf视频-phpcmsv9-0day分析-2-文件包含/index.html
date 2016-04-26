@@ -1,0 +1,599 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>360SkyWolf视频-phpcmsv9-0day分析-2-后台文件包含 | Hear7v&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Hear7v">
+    
+
+    
+    <meta name="description" content="0x01 漏洞详情这次的文件包含和上篇分析的sql注入产生自同一个地方，我们先来看看漏洞函数12345678910public static function get_cookie($var, $default = &apos;&apos;) &amp;#123;	$var = pc_base::load_config(&apos;system&apos;,&apos;cookie_pre&apos;).$var;	$value = isset($_COOKIE[">
+<meta property="og:type" content="article">
+<meta property="og:title" content="360SkyWolf视频-phpcmsv9-0day分析-2-后台文件包含">
+<meta property="og:url" content="http://yoursite.com/2015/12/18/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/index.html">
+<meta property="og:site_name" content="Hear7v's Blog">
+<meta property="og:description" content="0x01 漏洞详情这次的文件包含和上篇分析的sql注入产生自同一个地方，我们先来看看漏洞函数12345678910public static function get_cookie($var, $default = &apos;&apos;) &amp;#123;	$var = pc_base::load_config(&apos;system&apos;,&apos;cookie_pre&apos;).$var;	$value = isset($_COOKIE[">
+<meta property="og:image" content="http://yoursite.com/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/1.png">
+<meta property="og:image" content="http://yoursite.com/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/2.png">
+<meta property="og:image" content="http://yoursite.com/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/3.png">
+<meta property="og:image" content="http://yoursite.com/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/4.png">
+<meta property="og:image" content="http://yoursite.com/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/5.png">
+<meta property="og:updated_time" content="2016-01-11T03:06:31.635Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="360SkyWolf视频-phpcmsv9-0day分析-2-后台文件包含">
+<meta name="twitter:description" content="0x01 漏洞详情这次的文件包含和上篇分析的sql注入产生自同一个地方，我们先来看看漏洞函数12345678910public static function get_cookie($var, $default = &apos;&apos;) &amp;#123;	$var = pc_base::load_config(&apos;system&apos;,&apos;cookie_pre&apos;).$var;	$value = isset($_COOKIE[">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Hear7v&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Hear7v&#39;s Blog" title="Hear7v&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Hear7v&#39;s Blog">Hear7v&#39;s Blog</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/category">Category</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/12/18/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/" title="360SkyWolf视频-phpcmsv9-0day分析-2-后台文件包含" itemprop="url">360SkyWolf视频-phpcmsv9-0day分析-2-后台文件包含</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Hear7v" target="_blank" itemprop="author">Hear7v</a>
+		
+  <p class="article-time">
+    <time datetime="2015-12-18T15:47:37.000Z" itemprop="datePublished"> 發表於 2015-12-18</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01_漏洞详情"><span class="toc-number">1.</span> <span class="toc-text">0x01 漏洞详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02漏洞验证"><span class="toc-number">2.</span> <span class="toc-text">0x02漏洞验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="0x01_漏洞详情">0x01 漏洞详情</h2><p>这次的文件包含和上篇分析的sql注入产生自同一个地方，我们先来看看漏洞函数<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">get_cookie</span><span class="params">(<span class="variable">$var</span>, <span class="variable">$default</span> = <span class="string">''</span>)</span> </span>&#123;</span><br><span class="line">	<span class="variable">$var</span> = pc_base::load_config(<span class="string">'system'</span>,<span class="string">'cookie_pre'</span>).<span class="variable">$var</span>;</span><br><span class="line">	<span class="variable">$value</span> = <span class="keyword">isset</span>(<span class="variable">$_COOKIE</span>[<span class="variable">$var</span>]) ? sys_auth(<span class="variable">$_COOKIE</span>[<span class="variable">$var</span>], <span class="string">'DECODE'</span>) : <span class="variable">$default</span>;</span><br><span class="line">	<span class="keyword">if</span>(in_array(<span class="variable">$var</span>,<span class="keyword">array</span>(<span class="string">'_userid'</span>,<span class="string">'userid'</span>,<span class="string">'siteid'</span>,<span class="string">'_groupid'</span>,<span class="string">'_roleid'</span>))) &#123;</span><br><span class="line">		<span class="variable">$value</span> = intval(<span class="variable">$value</span>);</span><br><span class="line">	&#125; <span class="keyword">elseif</span>(in_array(<span class="variable">$var</span>,<span class="keyword">array</span>(<span class="string">'_username'</span>,<span class="string">'username'</span>,<span class="string">'_nickname'</span>,<span class="string">'admin_username'</span>,<span class="string">'sys_lang'</span>))) &#123; <span class="comment">//  site_model auth</span></span><br><span class="line">		<span class="variable">$value</span> = safe_replace(<span class="variable">$value</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="variable">$value</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上次我们分析了这里传入参数解码后避开检测的原因，也就是说这里的所有参数都有触发漏洞的可能，类似<code>id``name</code>这些参数很可能带入数据库，上一篇文章我们的跟踪也证实了注入的存在，这里我们再来看一看其他参数，<code>sys_lang</code>这个参数一下就触动了我们的注意力，在最新的phpcmsv9.5.10中就存在这个参数，<code>content.lang.php</code>,<code>zh-cn.lang.php</code>这样类似的文件在phpcms这样支持多语言的大型cms中十分常见，我们猜测可能是进行文件包含中的部分填充，我们接下来跟踪一下这个变量的走向。 </p>
+<p><code>phpcms\modules\admin\classes\admin.class.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="preprocessor">&lt;?php</span></span><br><span class="line">defined(<span class="string">'IN_PHPCMS'</span>) <span class="keyword">or</span> <span class="keyword">exit</span>(<span class="string">'No permission resources.'</span>);</span><br><span class="line"><span class="variable">$session_storage</span> = <span class="string">'session_'</span>.pc_base::load_config(<span class="string">'system'</span>,<span class="string">'session_storage'</span>);</span><br><span class="line">pc_base::load_sys_class(<span class="variable">$session_storage</span>);</span><br><span class="line"><span class="keyword">if</span>(param::get_cookie(<span class="string">'sys_lang'</span>)) &#123;</span><br><span class="line">	define(<span class="string">'SYS_STYLE'</span>,param::get_cookie(<span class="string">'sys_lang'</span>));</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	define(<span class="string">'SYS_STYLE'</span>,<span class="string">'zh-cn'</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">....</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这里我们发现<code>SYS_STYLE</code>参数接收了<code>sys_lang</code>的值，接着我们跟踪这个量，但是我们这里也发现了，这里是后台调用的脚本</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">L</span><span class="params">(<span class="variable">$language</span> = <span class="string">'no_language'</span>,<span class="variable">$pars</span> = array<span class="params">()</span>, <span class="variable">$modules</span> = <span class="string">''</span>)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="variable">$LANG</span> = <span class="keyword">array</span>();</span><br><span class="line">	<span class="keyword">static</span> <span class="variable">$LANG_MODULES</span> = <span class="keyword">array</span>();</span><br><span class="line">	<span class="keyword">static</span> <span class="variable">$lang</span> = <span class="string">''</span>;</span><br><span class="line">	<span class="keyword">if</span>(defined(<span class="string">'IN_ADMIN'</span>)) &#123;</span><br><span class="line">		<span class="variable">$lang</span> = SYS_STYLE ? SYS_STYLE : <span class="string">'zh-cn'</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="variable">$lang</span> = pc_base::load_config(<span class="string">'system'</span>,<span class="string">'lang'</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(!<span class="variable">$LANG</span>) &#123;</span><br><span class="line">		<span class="keyword">require_once</span> PC_PATH.<span class="string">'languages'</span>.DIRECTORY_SEPARATOR.<span class="variable">$lang</span>.DIRECTORY_SEPARATOR.<span class="string">'system.lang.php'</span>;</span><br><span class="line">		<span class="keyword">if</span>(defined(<span class="string">'IN_ADMIN'</span>)) <span class="keyword">require_once</span> PC_PATH.<span class="string">'languages'</span>.DIRECTORY_SEPARATOR.<span class="variable">$lang</span>.DIRECTORY_SEPARATOR.<span class="string">'system_menu.lang.php'</span>;</span><br><span class="line">		<span class="keyword">if</span>(file_exists(PC_PATH.<span class="string">'languages'</span>.DIRECTORY_SEPARATOR.<span class="variable">$lang</span>.DIRECTORY_SEPARATOR.ROUTE_M.<span class="string">'.lang.php'</span>)) <span class="keyword">require_once</span> PC_PATH.<span class="string">'languages'</span>.DIRECTORY_SEPARATOR.<span class="variable">$lang</span>.DIRECTORY_SEPARATOR.ROUTE_M.<span class="string">'.lang.php'</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(!<span class="keyword">empty</span>(<span class="variable">$modules</span>)) &#123;</span><br><span class="line">		<span class="variable">$modules</span> = explode(<span class="string">','</span>,<span class="variable">$modules</span>);</span><br><span class="line">		<span class="keyword">foreach</span>(<span class="variable">$modules</span> <span class="keyword">AS</span> <span class="variable">$m</span>) &#123;</span><br><span class="line">			<span class="keyword">if</span>(!<span class="keyword">isset</span>(<span class="variable">$LANG_MODULES</span>[<span class="variable">$m</span>])) <span class="keyword">require_once</span> PC_PATH.<span class="string">'languages'</span>.DIRECTORY_SEPARATOR.<span class="variable">$lang</span>.DIRECTORY_SEPARATOR.<span class="variable">$m</span>.<span class="string">'.lang.php'</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(!array_key_exists(<span class="variable">$language</span>,<span class="variable">$LANG</span>)) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="variable">$language</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="variable">$language</span> = <span class="variable">$LANG</span>[<span class="variable">$language</span>];</span><br><span class="line">		<span class="keyword">if</span>(<span class="variable">$pars</span>) &#123;</span><br><span class="line">			<span class="keyword">foreach</span>(<span class="variable">$pars</span> <span class="keyword">AS</span> <span class="variable">$_k</span>=&gt;<span class="variable">$_v</span>) &#123;</span><br><span class="line">				<span class="variable">$language</span> = str_replace(<span class="string">'&#123;'</span>.<span class="variable">$_k</span>.<span class="string">'&#125;'</span>,<span class="variable">$_v</span>,<span class="variable">$language</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="variable">$language</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据代码流程,<code>SYS_STYLE</code>参数在管理员后台的情况下会赋给<code>$lang</code>,接下来我们可以发现后面多条文件包含语句里面引入了<code>$lang</code>变量，产生文件包含的可能性很大，但是我们发现大多数包含后面都强制拼接了<code>lang.php</code>,<code>system.lang.php</code>,<code>system_menu.lang.php</code>等字串，给我们的利用带来了很大的困难。</p>
+<p>在php版本较低的情况下，我们可以试着中00截断，由于这里是编码传进服务器我们不用考虑gpc，字符串可以很稳定地构造好到达服务器，这样可以实现本地任意文件包含。</p>
+<p>在windows系统下有相应的截断方式 seay大神的 &lt;代码审计&gt;一书中有很好的总结，同样可以实现本地任意包含。</p>
+<p>由于最近忙着期末考试很难抽出时间来构造出巧妙合理的利用方式，害怕上一篇细节公开后别人交这个洞，先到这吧，还得复习，考完试再仔细研究。</p>
+<h2 id="0x02漏洞验证">0x02漏洞验证</h2><p>好吧，我回来了，没有等到考试，按捺不住心中的各种纠结，终于还是在当晚就有考试的白天调了出来，并且也有新的发现，整个过程十分纠结曲折。最终得出的结论是，auth_key泄露的前台文件任意文件包含。下面来看分析。</p>
+<p>产生原因还是如上分那样，不过再具体实现的过程中遇到了不少问题，首先是加解密脚本的错误，最新版的phpcms的加解密脚本和之前版本的不一样，所以一开始沿用之前的脚本吃了很大的亏，发现在后台根本无法将$lang赋值为我们的payload，于是就从那里回溯变量，最终发现了根本不需要进后台就能包含的脚本文件。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">phpcms/modules/admin/classes/admin.class.php</span><br><span class="line">phpcms/modules/attachment/attachment.php</span><br></pre></td></tr></table></figure>
+<p>上面的第二个脚本帮了我们，前台包含，所以我们只需要在后台登录界面，修改cookie便可以成功包含，因为时间问题这里我调低了php的版本用的<code>\x00</code>截断，具体的截断方式依据实际情况吧，下面上图验证</p>
+<p>来到后台登录界面<br><img src="/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/1.png" alt=""><br>刷新burp抓包<br><img src="/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/2.png" alt=""><br>加密payload<br><img src="/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/3.png" alt=""><br>替换包中相应sys_lang变量，发包，看看标题处，包含产生<br><img src="/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/4.png" alt=""><br>看看源码更清楚<br><img src="/images/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/5.png" alt=""></p>
+<h2 id="总结">总结</h2><p>其实这次主要的收获是回溯中间变量。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/web/">web</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/phpcms/">phpcms</a><a href="/tags/sqli/">sqli</a><a href="/tags/代码审计/">代码审计</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2015/12/18/360SkyWolf视频-phpcmsv9-0day分析-2-文件包含/" data-title="360SkyWolf视频-phpcmsv9-0day分析-2-后台文件包含 | Hear7v&#39;s Blog" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2015/12/24/python-exp-编写-基础知识总结/" title="python exp 编写 基础知识总结">
+  <strong>上一篇：</strong><br/>
+  <span>
+  python exp 编写 基础知识总结</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2015/12/12/文件包含截断总结/"  title="文件包含截断总结">
+ <strong>下一篇：</strong><br/> 
+ <span>文件包含截断总结
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01_漏洞详情"><span class="toc-number">1.</span> <span class="toc-text">0x01 漏洞详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02漏洞验证"><span class="toc-number">2.</span> <span class="toc-text">0x02漏洞验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/crypto/" title="crypto">crypto<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/linux/" title="linux">linux<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/misc/" title="misc">misc<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/pentest/" title="pentest">pentest<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/python/" title="python">python<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/web/" title="web">web<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/被动sql注入检测框架折腾/" title="被动sql注入检测框架折腾">被动sql注入检测框架折腾<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/python/" title="python">python<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/sqli/" title="sqli">sqli<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/exp/" title="exp">exp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/代码审计/" title="代码审计">代码审计<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/phpcms/" title="phpcms">phpcms<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/漏洞挖掘/" title="漏洞挖掘">漏洞挖掘<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/linux/" title="linux">linux<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ssrf/" title="ssrf">ssrf<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内网/" title="内网">内网<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/渗透/" title="渗透">渗透<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/object/" title="object">object<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/disable-functions/" title="disable_functions">disable_functions<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/文件包含/" title="文件包含">文件包含<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/header/" title="header">header<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/insert/" title="insert">insert<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/project/" title="project">project<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bypass/" title="bypass">bypass<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/moudle/" title="moudle">moudle<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情鏈接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.lynahex.com/" target="_blank" title="lynahex&#39;s Blog">lynahex&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">新浪微博</p>
+    <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> honesty and integrity surprisingly. <br/>
+			null</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Hear7v">Hear7v</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fe6d1f421bbc9962127a50488f9ed37d1' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

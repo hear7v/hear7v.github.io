@@ -1,0 +1,636 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>linux SUID SGID 浅析 | Hear7v&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Hear7v">
+    
+
+    
+    <meta name="description" content="UNIX下文件权限的表示方法和解析SUID是Set User ID,SGID是Set Group ID的意思。文件权限的表示格式    -rwxr-xr-x,这样的表示法一共有十位：
+9 8 7 6 5 4 3 2 1 0
+- r w x r - x r - x
+第九位表示文件类型，可以为p、d、l、s、c、b、-       
+
+p 命名管道文件
+d 目录文件
+l 符号链接文件
+- 普通文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux SUID SGID 浅析">
+<meta property="og:url" content="http://yoursite.com/2015/10/29/linux-SUID-SGID-浅析/index.html">
+<meta property="og:site_name" content="Hear7v's Blog">
+<meta property="og:description" content="UNIX下文件权限的表示方法和解析SUID是Set User ID,SGID是Set Group ID的意思。文件权限的表示格式    -rwxr-xr-x,这样的表示法一共有十位：
+9 8 7 6 5 4 3 2 1 0
+- r w x r - x r - x
+第九位表示文件类型，可以为p、d、l、s、c、b、-       
+
+p 命名管道文件
+d 目录文件
+l 符号链接文件
+- 普通文件">
+<meta property="og:updated_time" content="2016-01-11T03:07:26.204Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="linux SUID SGID 浅析">
+<meta name="twitter:description" content="UNIX下文件权限的表示方法和解析SUID是Set User ID,SGID是Set Group ID的意思。文件权限的表示格式    -rwxr-xr-x,这样的表示法一共有十位：
+9 8 7 6 5 4 3 2 1 0
+- r w x r - x r - x
+第九位表示文件类型，可以为p、d、l、s、c、b、-       
+
+p 命名管道文件
+d 目录文件
+l 符号链接文件
+- 普通文件">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Hear7v&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Hear7v&#39;s Blog" title="Hear7v&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Hear7v&#39;s Blog">Hear7v&#39;s Blog</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/category">Category</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/10/29/linux-SUID-SGID-浅析/" title="linux SUID SGID 浅析" itemprop="url">linux SUID SGID 浅析</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Hear7v" target="_blank" itemprop="author">Hear7v</a>
+		
+  <p class="article-time">
+    <time datetime="2015-10-28T16:16:51.000Z" itemprop="datePublished"> 發表於 2015-10-29</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#UNIX下文件权限的表示方法和解析"><span class="toc-number">1.</span> <span class="toc-text">UNIX下文件权限的表示方法和解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SUID和SGID机制"><span class="toc-number">2.</span> <span class="toc-text">SUID和SGID机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进程的用户id"><span class="toc-number">3.</span> <span class="toc-text">进程的用户id</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#实际用户ID(real_user_id,RUID)"><span class="toc-number">3.1.</span> <span class="toc-text">实际用户ID(real user id,RUID)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#有效用户ID(effective_user_id,EUID)"><span class="toc-number">3.2.</span> <span class="toc-text">有效用户ID(effective  user  id,EUID)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#保存设置用户ID(saved_set-user-id,SUID)"><span class="toc-number">3.3.</span> <span class="toc-text">保存设置用户ID(saved set-user-id,SUID)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总结:"><span class="toc-number">3.4.</span> <span class="toc-text">总结:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#竞争条件攻击"><span class="toc-number">4.</span> <span class="toc-text">竞争条件攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#案例"><span class="toc-number">4.1.</span> <span class="toc-text">案例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#竞争条件简介"><span class="toc-number">4.2.</span> <span class="toc-text">竞争条件简介</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#符号链接攻击"><span class="toc-number">5.</span> <span class="toc-text">符号链接攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#符号链接"><span class="toc-number">5.1.</span> <span class="toc-text">符号链接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安全威胁"><span class="toc-number">5.2.</span> <span class="toc-text">安全威胁</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<h2 id="UNIX下文件权限的表示方法和解析">UNIX下文件权限的表示方法和解析</h2><p><code>SUID</code>是Set User ID,<code>SGID</code>是Set Group ID的意思。<br>文件权限的表示格式    <code>-rwxr-xr-x</code>,这样的表示法一共有十位：</p>
+<pre><code><span class="number">9</span> <span class="number">8</span> <span class="number">7</span> <span class="number">6</span> <span class="number">5</span> <span class="number">4</span> <span class="number">3</span> <span class="number">2</span> <span class="number">1</span> <span class="number">0</span>
+- r w x r - x r - x
+</code></pre><p>第九位表示文件类型，可以为p、d、l、s、c、b、-       </p>
+<ul>
+<li>p 命名管道文件</li>
+<li>d 目录文件</li>
+<li>l 符号链接文件</li>
+<li>- 普通文件 </li>
+<li>s socket文件</li>
+<li>c 字符设备文件</li>
+<li>b 块设备文件</li>
+</ul>
+<p>后九位依次表示文件所有者，同组用户，其他用户的权限<br>如果一个文件被设置了<code>SUID</code>或<code>SGID</code>位，会分别表现在所有者或同组用户的可执行位上。例如：<code>-rwsr-xr-x</code>,<code>-rwxr-sr-x</code></p>
+<pre><code><span class="number">11</span> <span class="number">10</span> <span class="number">9</span> <span class="number">8</span> <span class="number">7</span> <span class="number">6</span> <span class="number">5</span> <span class="number">4</span> <span class="number">3</span> <span class="number">2</span> <span class="number">1</span> <span class="number">0</span>
+S  G  T r w x r w x r w x
+</code></pre><p>给文件加SUID和SUID的命令如下：</p>
+<ul>
+<li>chmod u+s filename 设置SUID位</li>
+<li>chmod u-s filename 去掉SUID设置</li>
+<li>chmod g+s filename 设置SGID位</li>
+<li>chmod g-s filename 去掉SGID设置</li>
+</ul>
+<h2 id="SUID和SGID机制">SUID和SGID机制</h2><p>由于<code>SUID</code>和<code>SGID</code>是在执行程序（程序的可执行位被设置）时起作用，而可执行位只对普通文件和目录文件有意义，所以设置其他种类文件的<code>SUID</code>和<code>SGID</code>位是没有多大意义的。</p>
+<p>UNIX的内核是根据什么来确定一个进程对资源的访问权限的呢？是这个进程的运行用户的（有效）ID，包括<code>user id</code>和<code>group id</code>。用户可以用<code>id</code>命令来查到自己的或其他用户的<code>user id</code>和<code>group id</code>。</p>
+<p>除了一般的<code>user id</code> 和<code>group id</code>外，还有两个称之为effective 的id，就是有效id，上面的四个id表示为：<code>uid</code>，<code>gid</code>，<code>euid</code>，<code>egid</code>。内核主要是根据<code>euid</code>和<code>egid</code>来确定进程对资源的访问权限。</p>
+<p>一个进程如果没有<code>SUID</code>或<code>SGID</code>位，则<code>euid=uid egid=gid</code>，分别是运行这个程序的用户的<code>uid</code>和<code>gid</code>。如果一个程序设置了<code>SUID</code>，则<code>euid</code>和<code>egid</code>变成被运行的程序的所有者的<code>uid</code>和<code>gid</code></p>
+<p><code>SUID</code>的作用就是这样：让本来没有相应权限的用户运行这个程序时，可以访问他没有权限访问的资源。</p>
+<p><code>SUID</code>的优先级比<code>SGID</code>高，当一个可执行程序设置了<code>SUID</code>，则<code>SGID</code>会自动变成相应的<code>egid</code>。</p>
+<p>通过以下的命令可以找到系统上所有的设置了suid的文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ find / -perm -<span class="number">04000</span> -type f -ls</span><br></pre></td></tr></table></figure>
+<h2 id="进程的用户id">进程的用户id</h2><h3 id="实际用户ID(real_user_id,RUID)">实际用户ID(real user id,RUID)</h3><p>为该进程的创建者的用户ID,也可以说是进程的执行者。该ID仅root用户可以修改</p>
+<h3 id="有效用户ID(effective_user_id,EUID)">有效用户ID(effective  user  id,EUID)</h3><p>该ID用户标识用户进程执行操作的权限。例如:如果EUID是0即(root),此时进程拥有root用户权限。普通用户可以将EUID设置为RUID或者SUID，而超级用户可以将EUID设置为任意的合法UID。</p>
+<p>注意：对于一个可执行的二进制文件，如果其set-user-id bit被设置，则运行改程序时，对应进程的有效用户ID(EUID)为该文件的文件所有者用户ID。</p>
+<h3 id="保存设置用户ID(saved_set-user-id,SUID)">保存设置用户ID(saved set-user-id,SUID)</h3><p>对于没有设置set-uid-bit的可执行程序而言，其对应进程的保存设置用户ID(SUID)为其实际用户ID;而对于设置了set-uid-bit的程序而言，其对应的保存设置用户ID(SUID)为该可执行文件的文件拥有者用户ID。只能root用户权限，才能更改(当一个程序文件运行的时候，其值已经确定)。</p>
+<p>注意:linux不提供返回保存的设置-用户-ID的函数</p>
+<h3 id="总结:">总结:</h3><p>RUID代表此进程是哪个用户创建的， EUID代表此进程所拥有的权限，SUID保存了EUID，当EUID改变后，如果想回到以前的EUID，此时SUID将发挥作用。</p>
+<h2 id="竞争条件攻击">竞争条件攻击</h2><h3 id="案例">案例</h3><p>Mallory 登录到一台运行 Linux 的重要服务器。 用户权限极小，但是 Mallory 知道如何使用它来制造麻烦。Mallory 安装并运行了一个行为非常奇怪的小程序，该程序使用多个进程在 /tmp 目录下快速地 创建和删除很多不同的符号链接文件。（符号链接文件也称为 symlink，是一种简单的文件， 当被访问时，它会将请求重定向到另一个文件。）Mallory 的程序不停地创建和删除很多 指向同一特殊文件（/etc/passwd，口令文件）的不同符号链接文件。</p>
+<p>这台重要的服务器的安全措施之一是，它每天都运行 Tripwire —— 具体地说，是较老的 2.3.0 版本。Tripwire 是一个检测重要文件是否被篡改的安全程序。与很多程序一样，Tripwire 启动时会尝试着创建一个临时文件。Tripwire 会查看并断定不存在名为“/tmp/twtempa19212”的文件，所以看起 来这是一个合适的临时文件名称。但是在 Tripwire 完成检查后，Mallory 的程序就会使用该名称创建一个符号链接文件。这不是偶然的；Mallory 程序的设计目标就是创建最有可能为 Tripwire 所使用的文件名。然后 Tripwire 就会打开该文件，开始写入临时信息，但不用创建新的空文件，Tripwire 现在正在重写口令文件！从那时起，任何人 —— 甚至是管理员 —— 都不能登录到该系统，因为口令文件已经被破坏了。更糟的是，Mallory 的攻击完全可以覆盖所有文件，包括服务器上存储的重要数据。</p>
+<h3 id="竞争条件简介">竞争条件简介</h3><p> 当由于事件次序异常而造成对同一资源的竞争，从而导致程序无法正常运行时，就会出现“竞争条件”。注意，竞争条件无需介入同一程序的两个部分之间的竞争； 如果一个外部的攻击者可以通过意想不到的方式干扰程序，那么就会出现很多安全问题。 例如，如果 Tripwire 2.3.0 确定某个文件不存在，它就会尝试着创建该文件，而不去考虑在进行这两个步骤期间，该文件是否已经被攻击者创建。几十年前，竞争条件还不是什么问题；那时， 计算机系统通常在同一时刻只能运行一个单独的程序，什么都不能打断它或者与它竞争。 但是，当今的计算机通常需要同时运行大量的进程和线程，经常还会有多个处理器确实在同时运行不同的程序。这样做更灵活，但是有一个危险：如果这些进程和线程共享了所有的资源，那么它们都可能互相影响。实际上，竞争条件缺陷是软件的更常见缺陷之一，此外，在类 Unix 系统上，/tmp 和 /var/tmp 目录经常会被错误地使用，从而导致竞争条件。<br> 不过，我们首先需要了解一些术语。所有 类-Unix 系统都支持用户进程；每个进程都有自己的内存空间（其他进程通常无法访问）。底层的内核会尽量使进程看起来像是在同时运行； 在多处理器的系统中，它们确实可以同时运行。从理论上讲，一个进程可以拥有一个或多个线程；这些线程可以共享内存。线程也可以同时运行。由于线程可以共享内存，所以，相对于进程，线程之间更有 可能产生竞争条件；正是由于这个原因，多线程程序的调试要困难得多。Linux 内核有一个非常好的 基本设计：只有线程，并且一些线程可以与其他线程共享内存（这样实现了传统的线程），而另外一些线程则不能（这样就实现了独立进程）。</p>
+<h2 id="符号链接攻击">符号链接攻击</h2><h3 id="符号链接">符号链接</h3><p>符号链接(软链接)是一个指针，指向文件在文件系统中的位置。符号链接可以跨文件系统，甚至可以指向远程文件系统中的文件。符号链接只是指明了原始文件的位置，用户需要对原始文件的位置有访问权限才可以使用链接。如果原始文件被删除，所有指向它的符号链接也就都被破坏了。它们会指向文件系统中并不存在的一个位置。<br>两种链接都可以通过命令 ln 来创建。ln 默认创建的是硬链接。使用 -s 开关可以创建符号链接。</p>
+<h3 id="安全威胁">安全威胁</h3><p><strong>web服务器方面</strong><br>如果允许服务器使用符号链接，就有潜在的安全威胁。将web服务器访问的文件限制在文<br>档树范围内是最重要的安全策略。如果存在符号链接，如某用户在其html目录下放置了一<br>个指向/etc的符号链接link_to_etc，则黑客就可以如下请求<code>/etc/passwd</code>文件：<br><code>http://localhost/~hack/link_to_ect/passwd</code></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/linux/">linux</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/linux/">linux</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2015/10/29/linux-SUID-SGID-浅析/" data-title="linux SUID SGID 浅析 | Hear7v&#39;s Blog" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2015/10/29/360SkyWolf视频-phpcmsv9-0day分析/" title="360SkyWolf视频_phpcmsv9_0day分析">
+  <strong>上一篇：</strong><br/>
+  <span>
+  360SkyWolf视频_phpcmsv9_0day分析</span>
+</a>
+</div>
+
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#UNIX下文件权限的表示方法和解析"><span class="toc-number">1.</span> <span class="toc-text">UNIX下文件权限的表示方法和解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SUID和SGID机制"><span class="toc-number">2.</span> <span class="toc-text">SUID和SGID机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进程的用户id"><span class="toc-number">3.</span> <span class="toc-text">进程的用户id</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#实际用户ID(real_user_id,RUID)"><span class="toc-number">3.1.</span> <span class="toc-text">实际用户ID(real user id,RUID)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#有效用户ID(effective_user_id,EUID)"><span class="toc-number">3.2.</span> <span class="toc-text">有效用户ID(effective  user  id,EUID)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#保存设置用户ID(saved_set-user-id,SUID)"><span class="toc-number">3.3.</span> <span class="toc-text">保存设置用户ID(saved set-user-id,SUID)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总结:"><span class="toc-number">3.4.</span> <span class="toc-text">总结:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#竞争条件攻击"><span class="toc-number">4.</span> <span class="toc-text">竞争条件攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#案例"><span class="toc-number">4.1.</span> <span class="toc-text">案例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#竞争条件简介"><span class="toc-number">4.2.</span> <span class="toc-text">竞争条件简介</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#符号链接攻击"><span class="toc-number">5.</span> <span class="toc-text">符号链接攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#符号链接"><span class="toc-number">5.1.</span> <span class="toc-text">符号链接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安全威胁"><span class="toc-number">5.2.</span> <span class="toc-text">安全威胁</span></a></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/crypto/" title="crypto">crypto<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/linux/" title="linux">linux<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/misc/" title="misc">misc<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/pentest/" title="pentest">pentest<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/python/" title="python">python<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/web/" title="web">web<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/被动sql注入检测框架折腾/" title="被动sql注入检测框架折腾">被动sql注入检测框架折腾<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/python/" title="python">python<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/sqli/" title="sqli">sqli<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/exp/" title="exp">exp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/代码审计/" title="代码审计">代码审计<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/phpcms/" title="phpcms">phpcms<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/漏洞挖掘/" title="漏洞挖掘">漏洞挖掘<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/linux/" title="linux">linux<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ssrf/" title="ssrf">ssrf<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内网/" title="内网">内网<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/渗透/" title="渗透">渗透<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/object/" title="object">object<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/disable-functions/" title="disable_functions">disable_functions<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/文件包含/" title="文件包含">文件包含<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/header/" title="header">header<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/insert/" title="insert">insert<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/project/" title="project">project<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bypass/" title="bypass">bypass<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/moudle/" title="moudle">moudle<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情鏈接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.lynahex.com/" target="_blank" title="lynahex&#39;s Blog">lynahex&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">新浪微博</p>
+    <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> honesty and integrity surprisingly. <br/>
+			null</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Hear7v">Hear7v</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fe6d1f421bbc9962127a50488f9ed37d1' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

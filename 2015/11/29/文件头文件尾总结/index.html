@@ -1,0 +1,622 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>文件头文件尾总结 | Hear7v&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Hear7v">
+    
+
+    
+    <meta name="description" content="JPEG (jpg)
+文件头：FFD8FF　文件尾：FFD9　　　　　　　　　　　　　　　PNG (png)
+文件头：89504E47　　　文件尾：AE426082GIF (gif)                           　　
+文件头：47494638    文件尾：00 3BZIP Archive (zip)
+文件头：504B0304　　    文件尾：50 4BTIFF (tif">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文件头文件尾总结">
+<meta property="og:url" content="http://yoursite.com/2015/11/29/文件头文件尾总结/index.html">
+<meta property="og:site_name" content="Hear7v's Blog">
+<meta property="og:description" content="JPEG (jpg)
+文件头：FFD8FF　文件尾：FFD9　　　　　　　　　　　　　　　PNG (png)
+文件头：89504E47　　　文件尾：AE426082GIF (gif)                           　　
+文件头：47494638    文件尾：00 3BZIP Archive (zip)
+文件头：504B0304　　    文件尾：50 4BTIFF (tif">
+<meta property="og:updated_time" content="2016-01-11T03:07:00.738Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="文件头文件尾总结">
+<meta name="twitter:description" content="JPEG (jpg)
+文件头：FFD8FF　文件尾：FFD9　　　　　　　　　　　　　　　PNG (png)
+文件头：89504E47　　　文件尾：AE426082GIF (gif)                           　　
+文件头：47494638    文件尾：00 3BZIP Archive (zip)
+文件头：504B0304　　    文件尾：50 4BTIFF (tif">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Hear7v&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Hear7v&#39;s Blog" title="Hear7v&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Hear7v&#39;s Blog">Hear7v&#39;s Blog</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/category">Category</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/11/29/文件头文件尾总结/" title="文件头文件尾总结" itemprop="url">文件头文件尾总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Hear7v" target="_blank" itemprop="author">Hear7v</a>
+		
+  <p class="article-time">
+    <time datetime="2015-11-29T07:10:51.000Z" itemprop="datePublished"> 發表於 2015-11-29</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JPEG_(jpg)"><span class="toc-number">1.</span> <span class="toc-text">JPEG (jpg)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PNG_(png)"><span class="toc-number">2.</span> <span class="toc-text">PNG (png)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GIF_(gif)"><span class="toc-number">3.</span> <span class="toc-text">GIF (gif)                           　　</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ZIP_Archive_(zip)"><span class="toc-number">4.</span> <span class="toc-text">ZIP Archive (zip)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TIFF_(tif)"><span class="toc-number">5.</span> <span class="toc-text">TIFF (tif)                           　</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows_Bitmap_(bmp)"><span class="toc-number">6.</span> <span class="toc-text">Windows Bitmap (bmp)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CAD_(dwg)"><span class="toc-number">7.</span> <span class="toc-text">CAD (dwg)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Adobe_Photoshop_(psd)，"><span class="toc-number">8.</span> <span class="toc-text">Adobe Photoshop (psd)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Rich_Text_Format_(rtf)，"><span class="toc-number">9.</span> <span class="toc-text">Rich Text Format (rtf)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#XML_(xml)，"><span class="toc-number">10.</span> <span class="toc-text">XML (xml)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTML_(html)，"><span class="toc-number">11.</span> <span class="toc-text">HTML (html)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Email_[thorough_only]_(eml)"><span class="toc-number">12.</span> <span class="toc-text">Email [thorough only] (eml)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Outlook_Express_(dbx)"><span class="toc-number">13.</span> <span class="toc-text">Outlook Express (dbx)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Outlook_(pst)"><span class="toc-number">14.</span> <span class="toc-text">Outlook (pst)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MS_Word/Excel_(xls-or-doc)"><span class="toc-number">15.</span> <span class="toc-text">MS Word/Excel (xls.or.doc)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MS_Access_(mdb)"><span class="toc-number">16.</span> <span class="toc-text">MS Access (mdb)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#WordPerfect_(wpd)"><span class="toc-number">17.</span> <span class="toc-text">WordPerfect (wpd)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Adobe_Acrobat_(pdf)"><span class="toc-number">18.</span> <span class="toc-text">Adobe Acrobat (pdf)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Quicken_(qdf)"><span class="toc-number">19.</span> <span class="toc-text">Quicken (qdf)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows_Password_(pwl)"><span class="toc-number">20.</span> <span class="toc-text">Windows Password (pwl)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RAR_Archive_(rar)，"><span class="toc-number">21.</span> <span class="toc-text">RAR Archive (rar)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Wave_(wav)"><span class="toc-number">22.</span> <span class="toc-text">Wave (wav)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AVI_(avi)"><span class="toc-number">23.</span> <span class="toc-text">AVI (avi)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Real_Audio_(ram)"><span class="toc-number">24.</span> <span class="toc-text">Real Audio (ram)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Real_Media_(rm)"><span class="toc-number">25.</span> <span class="toc-text">Real Media (rm)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MPEG_(mpg)"><span class="toc-number">26.</span> <span class="toc-text">MPEG (mpg)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MPEG_(mpg)-1"><span class="toc-number">27.</span> <span class="toc-text">MPEG (mpg)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Quicktime_(mov)"><span class="toc-number">28.</span> <span class="toc-text">Quicktime (mov)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows_Media_(asf)"><span class="toc-number">29.</span> <span class="toc-text">Windows Media (asf)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MIDI_(mid)"><span class="toc-number">30.</span> <span class="toc-text">MIDI (mid)</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="JPEG_(jpg)">JPEG (jpg)</h2><ul>
+<li>文件头：<code>FFD8FF</code>　文件尾：<code>FFD9</code>　　　　　　　　　　　　　　　<h2 id="PNG_(png)">PNG (png)</h2></li>
+<li>文件头：<code>89504E47</code>　　　文件尾：<code>AE426082</code><h2 id="GIF_(gif)">GIF (gif)                           　　</h2></li>
+<li>文件头：<code>47494638</code>    文件尾：<code>00 3B</code><h2 id="ZIP_Archive_(zip)">ZIP Archive (zip)</h2></li>
+<li>文件头：<code>504B0304</code>　　    文件尾：<code>50 4B</code><h2 id="TIFF_(tif)">TIFF (tif)                           　</h2></li>
+<li>文件头：<code>49492A00</code>　　    文件尾：<h2 id="Windows_Bitmap_(bmp)">Windows Bitmap (bmp)</h2></li>
+<li>文件头：<code>424D</code>　　　　　　    文件尾：<h2 id="CAD_(dwg)">CAD (dwg)</h2></li>
+<li>文件头：<code>41433130</code>　    文件尾：<h2 id="Adobe_Photoshop_(psd)，">Adobe Photoshop (psd)，</h2></li>
+<li>文件头：<code>38425053</code>    文件尾：<h2 id="Rich_Text_Format_(rtf)，">Rich Text Format (rtf)，</h2></li>
+<li>文件头：<code>7B5C727466</code>　文件尾：<h2 id="XML_(xml)，">XML (xml)，</h2></li>
+<li>文件头：<code>3C3F786D6C</code>    文件尾：<h2 id="HTML_(html)，">HTML (html)，</h2></li>
+<li>文件头：<code>68746D6C3E</code><h2 id="Email_[thorough_only]_(eml)">Email [thorough only] (eml)</h2></li>
+<li>文件头：<code>44656C69766572792D646174653A</code><h2 id="Outlook_Express_(dbx)">Outlook Express (dbx)</h2></li>
+<li>文件头：<code>CFAD12FEC5FD746F</code><h2 id="Outlook_(pst)">Outlook (pst)</h2></li>
+<li>文件头：<code>2142444E</code><h2 id="MS_Word/Excel_(xls-or-doc)">MS Word/Excel (xls.or.doc)</h2></li>
+<li>文件头：<code>D0CF11E0</code><h2 id="MS_Access_(mdb)">MS Access (mdb)</h2></li>
+<li>文件头：<code>5374616E64617264204A</code><h2 id="WordPerfect_(wpd)">WordPerfect (wpd)</h2></li>
+<li>文件头：<code>FF575043</code><h2 id="Adobe_Acrobat_(pdf)">Adobe Acrobat (pdf)</h2></li>
+<li>文件头：<code>255044462D312E</code><h2 id="Quicken_(qdf)">Quicken (qdf)</h2></li>
+<li>文件头：<code>AC9EBD8F</code><h2 id="Windows_Password_(pwl)">Windows Password (pwl)</h2></li>
+<li>文件头：<code>E3828596</code><h2 id="RAR_Archive_(rar)，">RAR Archive (rar)，</h2></li>
+<li>文件头：<code>52617221</code><h2 id="Wave_(wav)">Wave (wav)</h2></li>
+<li>文件头：<code>57415645</code><h2 id="AVI_(avi)">AVI (avi)</h2></li>
+<li>文件头：<code>41564920</code><h2 id="Real_Audio_(ram)">Real Audio (ram)</h2></li>
+<li>文件头：<code>2E7261FD</code><h2 id="Real_Media_(rm)">Real Media (rm)</h2></li>
+<li>文件头：<code>2E524D46</code><h2 id="MPEG_(mpg)">MPEG (mpg)</h2></li>
+<li>文件头：<code>000001BA</code><h2 id="MPEG_(mpg)-1">MPEG (mpg)</h2></li>
+<li>文件头：<code>000001B3</code><h2 id="Quicktime_(mov)">Quicktime (mov)</h2></li>
+<li>文件头：<code>6D6F6F76</code><h2 id="Windows_Media_(asf)">Windows Media (asf)</h2></li>
+<li>文件头：<code>3026B2758E66CF11</code><h2 id="MIDI_(mid)">MIDI (mid)</h2></li>
+<li>文件头：<code>4D546864</code></li>
+</ul>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/misc/">misc</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/header/">header</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://yoursite.com/2015/11/29/文件头文件尾总结/" data-title="文件头文件尾总结 | Hear7v&#39;s Blog" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2015/12/09/被动sql注入检测框架/" title="被动sql注入检测框架">
+  <strong>上一篇：</strong><br/>
+  <span>
+  被动sql注入检测框架</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2015/11/21/php反序列化漏洞/"  title="php反序列化漏洞">
+ <strong>下一篇：</strong><br/> 
+ <span>php反序列化漏洞
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JPEG_(jpg)"><span class="toc-number">1.</span> <span class="toc-text">JPEG (jpg)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PNG_(png)"><span class="toc-number">2.</span> <span class="toc-text">PNG (png)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GIF_(gif)"><span class="toc-number">3.</span> <span class="toc-text">GIF (gif)                           　　</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ZIP_Archive_(zip)"><span class="toc-number">4.</span> <span class="toc-text">ZIP Archive (zip)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TIFF_(tif)"><span class="toc-number">5.</span> <span class="toc-text">TIFF (tif)                           　</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows_Bitmap_(bmp)"><span class="toc-number">6.</span> <span class="toc-text">Windows Bitmap (bmp)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CAD_(dwg)"><span class="toc-number">7.</span> <span class="toc-text">CAD (dwg)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Adobe_Photoshop_(psd)，"><span class="toc-number">8.</span> <span class="toc-text">Adobe Photoshop (psd)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Rich_Text_Format_(rtf)，"><span class="toc-number">9.</span> <span class="toc-text">Rich Text Format (rtf)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#XML_(xml)，"><span class="toc-number">10.</span> <span class="toc-text">XML (xml)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTML_(html)，"><span class="toc-number">11.</span> <span class="toc-text">HTML (html)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Email_[thorough_only]_(eml)"><span class="toc-number">12.</span> <span class="toc-text">Email [thorough only] (eml)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Outlook_Express_(dbx)"><span class="toc-number">13.</span> <span class="toc-text">Outlook Express (dbx)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Outlook_(pst)"><span class="toc-number">14.</span> <span class="toc-text">Outlook (pst)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MS_Word/Excel_(xls-or-doc)"><span class="toc-number">15.</span> <span class="toc-text">MS Word/Excel (xls.or.doc)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MS_Access_(mdb)"><span class="toc-number">16.</span> <span class="toc-text">MS Access (mdb)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#WordPerfect_(wpd)"><span class="toc-number">17.</span> <span class="toc-text">WordPerfect (wpd)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Adobe_Acrobat_(pdf)"><span class="toc-number">18.</span> <span class="toc-text">Adobe Acrobat (pdf)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Quicken_(qdf)"><span class="toc-number">19.</span> <span class="toc-text">Quicken (qdf)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows_Password_(pwl)"><span class="toc-number">20.</span> <span class="toc-text">Windows Password (pwl)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RAR_Archive_(rar)，"><span class="toc-number">21.</span> <span class="toc-text">RAR Archive (rar)，</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Wave_(wav)"><span class="toc-number">22.</span> <span class="toc-text">Wave (wav)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AVI_(avi)"><span class="toc-number">23.</span> <span class="toc-text">AVI (avi)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Real_Audio_(ram)"><span class="toc-number">24.</span> <span class="toc-text">Real Audio (ram)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Real_Media_(rm)"><span class="toc-number">25.</span> <span class="toc-text">Real Media (rm)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MPEG_(mpg)"><span class="toc-number">26.</span> <span class="toc-text">MPEG (mpg)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MPEG_(mpg)-1"><span class="toc-number">27.</span> <span class="toc-text">MPEG (mpg)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Quicktime_(mov)"><span class="toc-number">28.</span> <span class="toc-text">Quicktime (mov)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows_Media_(asf)"><span class="toc-number">29.</span> <span class="toc-text">Windows Media (asf)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MIDI_(mid)"><span class="toc-number">30.</span> <span class="toc-text">MIDI (mid)</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/crypto/" title="crypto">crypto<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/linux/" title="linux">linux<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/misc/" title="misc">misc<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/pentest/" title="pentest">pentest<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/php/" title="php">php<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/python/" title="python">python<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/web/" title="web">web<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/被动sql注入检测框架折腾/" title="被动sql注入检测框架折腾">被动sql注入检测框架折腾<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/python/" title="python">python<sup>7</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/sqli/" title="sqli">sqli<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/exp/" title="exp">exp<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/代码审计/" title="代码审计">代码审计<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/phpcms/" title="phpcms">phpcms<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/漏洞挖掘/" title="漏洞挖掘">漏洞挖掘<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/linux/" title="linux">linux<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ssrf/" title="ssrf">ssrf<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内网/" title="内网">内网<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/渗透/" title="渗透">渗透<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/object/" title="object">object<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/disable-functions/" title="disable_functions">disable_functions<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/php/" title="php">php<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/文件包含/" title="文件包含">文件包含<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/header/" title="header">header<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/insert/" title="insert">insert<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/project/" title="project">project<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bypass/" title="bypass">bypass<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/moudle/" title="moudle">moudle<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情鏈接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://www.lynahex.com/" target="_blank" title="lynahex&#39;s Blog">lynahex&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">新浪微博</p>
+    <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> honesty and integrity surprisingly. <br/>
+			null</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="Hear7v">Hear7v</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fe6d1f421bbc9962127a50488f9ed37d1' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
